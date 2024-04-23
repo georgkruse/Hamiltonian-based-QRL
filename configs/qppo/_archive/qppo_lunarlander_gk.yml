@@ -1,0 +1,89 @@
+type:                        QRL                   # choose a type: RL, GA, Hypernetwork, ...
+alg:                         QPPO                  # name of the algorithm
+use_ray_alg:                 False                 # use custom algorithm or ray framework
+seed:                        42                   # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+
+mode:                        training             # select the mode you want to use: 'custom', 'training'
+trainer:                     default
+checkpoint_freq:             50
+checkpoint_at_end:           False
+ray_local_mode:              False                # set local_mode of ray to True for debugging
+load_path:                   some/path/weights    # provide a model weight path if you want to do continue from stopped training
+
+ray_logging_path:            logs/qppo/lunarlander      # logging directory
+total_num_cpus:              150                   # total number of cpus
+total_num_gpus:              0                    # total number of gpus
+ray_num_trial_samples:       3                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:         300                  # number of training iterations
+
+env_type:                 gym_game
+env:                      LunarLander-v2
+env_config:
+  mode:                   classical                   
+
+# Additional custom parameters
+# withOUT rescaling of critic between 0-2
+algorithm_config:
+  num_gpus:                   0                   # number of gpus for each trial
+  num_workers:                20                   # number of worker for each trial. By ray default, every worker needs one cpu
+  num_envs_per_worker:        1                   # number of game enviroments for each worker
+  num_gpus_per_worker:        0                   # number of worker for each trial.
+  num_cpus_per_worker:        0.5                   # number of worker for each trial.
+  l:                          1
+  lr:                         0.001
+    # - grid_search
+    # - [0.001, 0.0001]   
+  lr_output_scaling:          0.01
+  #   - grid_search
+  #   - [0.01, 0.001]  
+  num_layers:                 5    
+  constant_seed:              False 
+  mode:                       quantum # classical, quantum, hybrid
+  optimizer:                  Adam
+  framework:                  torch
+  backend_type:               pennylane                             # This doesn't work yet
+  backend_name:               lightning.qubit
+  vqc_type:                   full_ent #rot_circuit_double #custom_ent_lunar
+    # - grid_search
+    # - [rot_circuit_double, custom_ent_lunar]
+  measurement_type_actor:           exp_@_exp            # type of measurement (check the python files for examples) (exp for discrete)
+  #   - grid_search
+  #   - [exp, exp_@_exp]
+  measurement_type_critic:    exp_@_exp
+  #   - grid_search
+  #   - [exp, exp_@_exp]
+  action_type:                normal                # action postprocessing type (raw/normal)
+  init_params:                0.1 
+  init_params_mode:           plus-zero-normal    # plus-zero-uniform #, plus-plus-normal. plus-zero-normal
+  layerwise_training:         False
+  use_input_scaling:          True                  # Uses input scaling (initialized at all ones)
+  use_output_scaling_actor:   True
+  init_output_scaling_actor:  [1.]
+    # - grid_search 
+    # - [10., [10.]] 
+  use_output_scaling_critic:  True                     # Uses output scaling  
+  init_output_scaling_critic: -1.
+    # - grid_search
+    # - [10, 30, 60]
+  gradient_clipping:          False
+  use_classical_layer:        False
+  layer_size:                 64
+  weight_logging_interval:    5000
+  weight_plotting:            True
+  
+  train_batch_size:           4000
+  num_sgd_iter:               12
+  sgd_minibatch_size:         100
+  rollout_fragment_length:    200
+  gamma:                      0.99
+  lambda:                     0.99
+  # kl_coeff:                   1.
+  vf_loss_coeff:              0.5
+  clip_param:                 0.2
+  # grad_clip:                  3
+  vf_clip_param:              50000
+  # batch_mode:                 complete_episodes
+  # observation_filter:         MeanStdFilter
+
+
+

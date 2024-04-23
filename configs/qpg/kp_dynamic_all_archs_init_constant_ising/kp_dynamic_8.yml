@@ -1,0 +1,196 @@
+type:                             QRL                   # choose a type: RL, GA, Hypernetwork (DEPRECATED)
+alg:                              QPG                   # name of the algorithm
+seed:                             42                    # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+constant_seed:                    False                 # setting the same seed accross all runs
+checkpoint_at_end:                True                 # create checkpoint at the end of training
+checkpoint_freq:                  1500                  # set checkpoint frequency, depends on training iterations
+ray_local_mode:                   False                 # set local_mode of ray to True for debugging
+ray_logging_path:                 logs/knapsack/dynamic/final_results/init_constant/ising/8         # logging directory
+total_num_cpus:                   12                    # total number of cpus
+total_num_gpus:                   0                     # total number of gpus
+ray_num_trial_samples:            3                     # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:              1000                   # number of training iterations
+run_sections:                                           # specifiy the code you want to run
+                                - qrl_training
+                                #- plotting
+                                # - landscape_plotting
+                                # - algorithm_benchmarking
+                                # - variance_calculatio
+
+###########################################################################
+env:                              KNAPSACKSEQUENTIALDYNAMIC                        # Game config               
+env_config:
+  instances_size:                 8
+  values:                         [[0.82, 0.36, 1.13, 0.45, 0.43, 1.5, 0.68, 0.79], [0.5, 0.09, 0.99, 1.73, 0.73, 1.02, 1.33, 1.73], [1.21, 0.94, 1.45, 2.28, 1.23, 1.19, 0.7, 1.06], [1.0, 0.67, 0.55, 0.76, 0.05, 1.42, 1.79, 1.13], [1.51, 1.65, 0.49, 0.79, 1.67, 0.1, 0.94, 0.48], [0.81, 0.59, 0.88, 1.2, 0.79, 1.15, 0.75, 1.27], [1.08, 0.68, 0.19, 0.82, 1.51, 0.33, 0.96, 0.68], [1.69, 1.09, 1.67, 1.99, 1.83, 1.65, 1.01, 0.89], [0.9, 0.41, 0.72, 1.48, 0.91, 0.23, 1.42, 0.69], [0.54, 0.61, 1.62, 0.51, 0.62, 0.6, 0.52, 1.41], [1.74, 0.86, 1.65, 0.17, 1.13, 1.36, 1.09, 0.84], [1.06, 0.54, 0.44, 0.36, 0.7, 0.82, 0.3, 0.77], [0.15, 0.97, 1.32, 1.08, 0.96, 1.08, 1.29, 0.67], [0.37, 1.29, 1.39, 1.54, 0.72, 1.84, 1.04, 0.7], [0.55, 0.52, 0.72, 1.28, 1.72, 0.37, 1.7, 1.45], [0.3, 1.37, 0.05, 0.89, 1.3, 0.53, 1.16, 1.12], [0.05, 1.23, 0.99, 0.97, 0.05, 1.05, 1.45, 1.18], [0.2, 1.39, 1.13, 1.33, 0.75, 1.61, 1.18, 0.41], [1.23, 0.54, 0.99, 0.88, 1.02, 0.25, 1.24, 1.57], [1.53, 0.32, 0.79, 0.33, 1.69, 1.18, 1.08, 0.58], [0.58, 0.3, 0.85, 0.78, 0.4, 0.47, 1.06, 0.38], [1.02, 0.51, 0.8, 1.22, 0.99, 0.95, 1.68, 0.68], [1.64, 1.29, 0.52, 1.4, 1.46, 0.86, 0.05, 1.01], [0.94, 1.62, 0.99, 1.96, 0.95, 1.17, 1.01, 1.74], [0.62, 0.7, 0.73, 0.46, 1.36, 1.55, 0.99, 1.22], [1.36, 0.56, 1.26, 1.93, 0.58, 1.1, 0.43, 0.05], [1.82, 0.24, 1.16, 1.72, 1.24, 1.17, 1.08, 1.43], [1.45, 0.93, 1.52, 0.74, 1.45, 2.43, 1.16, 1.37], [0.14, 1.39, 1.64, 1.98, 0.59, 0.05, 0.05, 0.95], [0.92, 0.98, 0.4, 0.81, 1.36, 1.93, 0.83, 0.57], [1.81, 0.08, 0.3, 0.15, 0.05, 1.02, 0.48, 1.03], [1.22, 1.68, 1.23, 0.5, 1.08, 0.72, 0.94, 0.91], [0.61, 1.73, 0.07, 1.12, 1.68, 1.58, 1.48, 1.21], [1.3, 0.66, 0.05, 0.16, 1.41, 1.08, 1.24, 1.52], [0.37, 0.96, 1.37, 1.13, 1.26, 0.52, 0.6, 1.16], [1.68, 1.11, 1.19, 1.5, 1.69, 1.51, 0.9, 0.87], [1.59, 0.97, 1.63, 1.16, 1.08, 0.26, 0.73, 0.39], [0.79, 1.31, 0.05, 0.81, 1.26, 1.47, 0.6, 0.35], [0.18, 1.27, 0.61, 0.71, 0.66, 1.01, 0.54, 0.78], [1.49, 1.21, 0.13, 1.1, 1.1, 0.83, 0.15, 0.05], [0.92, 2.51, 1.03, 0.24, 1.65, 0.32, 1.36, 0.13], [1.42, 0.92, 1.06, 0.05, 1.7, 1.3, 0.7, 1.82], [0.17, 0.81, 0.24, 0.79, 0.81, 0.93, 2.0, 0.55], [1.37, 0.3, 1.8, 0.99, 1.55, 1.98, 0.34, 0.95], [1.63, 1.26, 1.05, 1.15, 0.8, 1.41, 0.82, 0.05], [0.91, 0.51, 1.22, 1.05, 0.4, 0.45, 0.7, 0.52], [1.21, 0.31, 0.88, 0.4, 0.65, 1.51, 1.12, 0.97], [0.96, 1.08, 1.03, 0.65, 0.73, 1.44, 0.9, 0.98], [0.05, 1.15, 0.42, 1.58, 0.17, 1.19, 0.82, 0.99], [1.09, 1.59, 0.59, 0.84, 1.21, 1.98, 1.51, 0.13], [0.92, 0.16, 1.21, 0.63, 0.23, 1.23, 1.38, 1.7], [1.8, 1.91, 0.93, 0.88, 0.88, 1.17, 0.91, 1.7], [0.17, 1.19, 1.61, 1.11, 0.93, 1.58, 0.36, 0.56], [1.43, 0.69, 0.61, 0.96, 0.08, 0.05, 1.25, 1.47], [1.34, 1.03, 1.13, 1.21, 0.37, 0.75, 0.95, 1.09], [0.54, 1.14, 1.3, 0.87, 0.46, 0.19, 0.71, 1.19], [0.95, 1.04, 0.76, 1.7, 0.52, 1.13, 0.66, 2.36], [1.52, 0.71, 1.32, 1.24, 0.64, 0.11, 1.67, 0.45], [1.19, 1.21, 0.28, 1.01, 0.57, 0.78, 1.2, 0.48], [0.91, 1.64, 1.48, 1.13, 1.27, 1.36, 2.06, 1.18], [1.69, 0.48, 0.21, 1.2, 0.77, 1.34, 0.88, 1.21], [0.85, 0.54, 0.63, 1.35, 0.75, 1.0, 1.63, 1.29], [0.86, 1.03, 0.72, 0.92, 1.31, 1.72, 1.49, 1.06], [0.41, 1.5, 0.9, 2.1, 0.85, 1.54, 0.75, 0.56], [0.09, 1.62, 0.52, 0.87, 1.23, 0.82, 0.83, 0.8], [1.32, 0.8, 1.27, 0.11, 0.69, 0.78, 0.73, 1.05], [0.59, 1.65, 1.53, 0.2, 0.75, 0.18, 0.6, 0.84], [1.61, 0.6, 0.79, 1.19, 0.81, 0.59, 0.81, 0.6], [1.16, 1.17, 1.03, 1.67, 1.63, 1.43, 1.9, 0.2], [0.78, 0.76, 0.95, 0.46, 1.2, 0.2, 0.8, 1.79], [1.46, 0.77, 0.78, 0.86, 0.49, 1.36, 1.36, 1.45], [0.72, 0.89, 0.24, 0.8, 0.38, 1.07, 0.05, 0.43], [1.26, 0.63, 1.02, 1.07, 0.77, 0.31, 1.82, 1.67], [0.05, 1.68, 0.05, 0.73, 1.42, 1.51, 1.43, 0.59], [0.47, 0.9, 1.22, 1.69, 0.58, 0.99, 1.31, 1.21], [0.64, 0.75, 1.04, 0.52, 1.27, 0.78, 0.05, 1.28], [1.43, 1.74, 0.67, 1.0, 0.5, 1.1, 1.24, 0.83], [0.76, 1.11, 1.0, 0.05, 1.66, 0.95, 1.2, 0.26], [0.9, 0.61, 0.87, 0.24, 0.65, 0.56, 1.15, 1.77], [0.85, 1.56, 1.29, 0.44, 1.15, 1.32, 0.63, 1.08], [1.11, 0.65, 0.93, 0.98, 1.24, 0.2, 0.73, 0.41], [1.93, 1.51, 0.15, 0.26, 0.69, 0.86, 0.35, 0.34], [1.37, 1.37, 1.48, 1.31, 0.05, 0.94, 1.08, 1.11], [0.9, 1.21, 0.67, 0.8, 0.28, 0.93, 1.16, 1.43], [0.59, 0.69, 0.09, 0.83, 0.85, 0.79, 0.79, 0.83], [1.56, 0.61, 0.9, 0.42, 1.9, 1.41, 1.52, 0.86], [0.99, 0.98, 0.97, 1.45, 1.28, 2.12, 0.89, 1.24], [0.78, 1.05, 0.23, 0.97, 0.98, 1.14, 0.92, 0.52], [0.85, 1.4, 1.55, 1.71, 2.03, 1.84, 0.53, 1.06], [0.34, 0.75, 0.54, 1.43, 0.89, 0.73, 0.46, 1.71], [0.94, 0.22, 1.75, 2.0, 0.79, 0.32, 2.06, 1.08], [0.85, 1.82, 0.61, 1.06, 0.7, 1.35, 0.43, 0.86], [1.62, 0.27, 0.43, 0.8, 0.48, 1.78, 0.4, 1.77], [0.25, 0.05, 0.47, 1.06, 1.46, 0.96, 1.33, 0.76], [1.2, 1.11, 0.89, 0.75, 1.52, 0.77, 1.5, 1.56], [2.27, 0.95, 1.03, 1.14, 0.83, 1.51, 0.15, 1.41], [0.85, 0.87, 0.21, 1.28, 0.32, 1.12, 0.73, 0.5], [0.45, 0.86, 0.56, 0.58, 0.61, 0.91, 0.15, 0.94], [0.47, 1.04, 1.17, 0.44, 0.88, 1.36, 1.41, 1.12], [0.88, 1.24, 1.14, 0.72, 0.9, 1.64, 2.03, 0.79]]
+  weights:                        [[1.73, 1.26, 1.51, 0.91, 1.81, 0.49, 1.4, 1.01], [0.65, 0.97, 1.24, 0.97, 1.07, 1.03, 0.86, 0.84], [0.56, 1.13, 1.75, 1.29, 0.82, 1.5, 1.68, 0.05], [1.16, 1.94, 0.63, 1.21, 1.29, 0.7, 1.59, 0.46], [1.75, 0.59, 0.94, 0.87, 0.86, 1.2, 1.35, 1.1], [0.64, 1.55, 1.51, 1.37, 0.45, 0.91, 0.74, 1.51], [2.51, 1.09, 1.34, 0.77, 1.28, 1.32, 0.92, 0.74], [1.46, 1.67, 0.49, 1.26, 0.86, 1.15, 0.51, 0.05], [0.89, 0.48, 1.34, 0.86, 2.29, 1.73, 0.88, 1.01], [0.95, 0.05, 1.61, 1.69, 1.55, 0.66, 0.9, 1.78], [1.28, 1.56, 1.15, 1.28, 1.41, 0.81, 0.42, 1.33], [0.64, 1.98, 0.33, 0.51, 1.36, 1.34, 0.95, 1.54], [1.76, 1.04, 1.99, 0.05, 1.48, 0.65, 0.53, 0.99], [1.08, 1.32, 1.49, 2.42, 1.65, 1.11, 0.41, 1.24], [0.55, 1.18, 1.34, 1.27, 1.24, 0.34, 0.66, 2.21], [0.05, 1.87, 0.89, 1.26, 0.94, 0.98, 1.45, 1.25], [1.08, 0.89, 1.42, 1.38, 1.93, 0.53, 0.8, 1.39], [0.8, 1.54, 1.37, 0.93, 2.2, 1.38, 1.58, 0.22], [0.62, 0.5, 0.71, 1.01, 1.57, 0.63, 1.14, 0.61], [0.59, 0.67, 0.99, 0.43, 0.85, 1.59, 0.69, 1.4], [1.07, 0.78, 1.78, 1.48, 1.75, 0.53, 1.38, 0.05], [0.81, 2.26, 0.05, 0.86, 1.07, 1.37, 1.44, 1.95], [2.02, 0.35, 0.5, 0.71, 1.67, 0.62, 0.94, 0.78], [0.82, 2.11, 2.22, 0.17, 2.38, 0.05, 0.06, 1.37], [0.84, 1.16, 1.26, 0.91, 0.19, 1.42, 0.58, 0.17], [0.3, 0.97, 1.4, 0.35, 1.0, 0.15, 1.12, 0.18], [0.2, 1.18, 0.95, 0.86, 1.63, 0.73, 0.91, 1.12], [2.0, 0.24, 1.14, 0.93, 0.72, 1.86, 0.81, 1.56], [0.36, 0.58, 1.51, 1.08, 0.73, 2.04, 1.01, 0.64], [0.87, 0.71, 1.22, 0.49, 2.09, 1.7, 1.26, 0.78], [0.59, 0.83, 0.48, 1.9, 0.56, 1.23, 1.04, 0.9], [0.23, 1.5, 1.1, 0.53, 2.11, 0.43, 1.67, 1.21], [1.07, 0.77, 1.38, 0.38, 1.08, 1.28, 0.5, 0.44], [0.84, 0.41, 0.52, 1.24, 1.11, 0.37, 1.08, 0.26], [1.79, 0.98, 0.39, 0.72, 1.32, 1.62, 0.73, 0.81], [0.95, 1.22, 1.45, 0.3, 0.81, 0.75, 0.18, 0.58], [1.12, 1.22, 0.87, 1.42, 1.33, 0.58, 1.35, 1.25], [1.15, 0.82, 1.51, 0.75, 0.85, 0.92, 1.76, 1.74], [1.19, 1.32, 1.85, 1.0, 1.0, 1.03, 1.1, 1.52], [1.51, 1.2, 0.83, 1.21, 1.4, 1.09, 1.77, 1.13], [0.2, 1.48, 1.05, 0.19, 1.5, 1.46, 1.43, 1.33], [0.99, 1.66, 0.06, 0.53, 1.55, 0.81, 0.94, 1.11], [1.06, 1.25, 0.3, 0.32, 1.05, 0.05, 2.22, 1.26], [1.27, 1.57, 1.19, 0.63, 0.08, 1.01, 0.4, 0.33], [0.55, 0.87, 1.88, 1.54, 1.1, 0.99, 1.42, 1.93], [1.58, 1.03, 1.82, 1.14, 0.65, 0.61, 1.75, 0.74], [0.78, 1.21, 1.95, 1.11, 1.14, 1.22, 0.56, 1.84], [0.55, 1.87, 1.09, 1.41, 1.18, 0.57, 1.53, 0.05], [1.2, 0.28, 1.13, 0.05, 0.97, 1.02, 0.85, 1.5], [0.97, 0.85, 0.29, 1.01, 0.94, 1.68, 0.67, 0.78], [1.28, 1.07, 1.0, 0.77, 1.7, 1.13, 1.26, 1.22], [1.92, 1.02, 1.32, 1.62, 1.82, 1.06, 1.24, 0.57], [1.59, 0.24, 0.8, 0.49, 0.88, 0.94, 1.85, 0.6], [1.37, 0.89, 0.62, 1.53, 0.97, 1.14, 1.46, 1.53], [1.01, 0.32, 1.34, 1.61, 1.22, 0.15, 1.33, 1.34], [0.86, 0.64, 0.05, 0.85, 1.22, 0.76, 0.69, 1.07], [1.48, 0.39, 1.89, 0.88, 0.6, 0.59, 0.94, 0.64], [0.62, 0.95, 0.4, 1.34, 0.14, 0.99, 0.33, 1.25], [0.97, 1.14, 0.9, 0.46, 0.67, 0.21, 1.01, 0.28], [0.36, 0.95, 1.0, 0.78, 0.93, 1.0, 0.66, 1.41], [1.38, 0.71, 1.01, 0.27, 1.48, 0.31, 1.64, 0.05], [1.1, 0.05, 1.69, 0.78, 1.32, 0.88, 1.15, 0.74], [1.34, 0.66, 0.62, 0.84, 1.56, 0.7, 0.63, 1.35], [0.05, 0.49, 1.26, 0.69, 0.43, 1.19, 1.33, 1.5], [0.61, 1.44, 0.84, 1.33, 1.1, 0.57, 1.1, 1.08], [0.29, 0.8, 1.62, 0.79, 0.67, 0.52, 1.93, 0.56], [0.26, 1.15, 0.97, 1.35, 0.98, 1.12, 0.88, 0.92], [1.22, 0.98, 0.37, 0.94, 0.3, 1.14, 1.05, 1.7], [1.4, 1.21, 0.22, 1.23, 0.93, 0.66, 1.27, 1.22], [0.92, 1.1, 1.29, 1.11, 1.42, 0.68, 0.63, 1.12], [1.33, 0.84, 1.09, 1.63, 1.49, 2.18, 1.33, 1.66], [0.94, 0.32, 0.59, 0.63, 0.37, 0.85, 1.04, 2.06], [1.9, 1.03, 0.84, 0.92, 0.76, 2.33, 2.31, 0.95], [1.19, 1.18, 0.35, 2.43, 1.03, 1.2, 1.22, 0.5], [1.9, 1.68, 0.68, 0.45, 1.1, 0.73, 0.71, 1.22], [1.59, 1.52, 1.13, 0.85, 0.66, 1.43, 0.79, 0.4], [1.11, 1.3, 0.82, 0.97, 1.0, 0.92, 0.9, 1.23], [0.05, 1.12, 1.54, 0.56, 0.18, 1.06, 0.99, 0.92], [1.29, 0.95, 0.78, 0.73, 0.58, 0.62, 1.71, 0.54], [1.46, 1.01, 0.34, 0.05, 0.92, 0.45, 0.99, 0.66], [0.77, 0.94, 0.28, 1.09, 0.72, 0.76, 0.56, 0.8], [0.91, 1.27, 1.4, 0.39, 1.36, 1.84, 1.83, 0.05], [0.97, 1.0, 0.36, 0.93, 1.0, 1.12, 1.37, 1.06], [0.61, 1.19, 0.74, 1.27, 0.72, 0.32, 1.15, 2.04], [1.68, 1.2, 1.45, 1.31, 1.41, 1.28, 0.28, 0.81], [0.44, 1.61, 1.25, 1.6, 0.96, 0.98, 0.61, 0.98], [1.06, 0.05, 0.73, 0.61, 0.83, 0.72, 1.25, 1.58], [0.55, 1.5, 0.78, 2.21, 2.4, 0.48, 1.34, 1.33], [0.93, 0.2, 1.64, 0.82, 0.1, 0.91, 0.51, 0.92], [1.27, 0.94, 1.7, 1.01, 0.45, 0.82, 0.84, 1.28], [0.88, 1.45, 0.59, 0.84, 0.76, 1.58, 0.73, 1.29], [1.3, 0.6, 1.36, 1.01, 1.51, 1.83, 1.04, 1.23], [0.44, 0.28, 0.57, 1.37, 1.18, 1.43, 2.14, 0.78], [2.03, 1.36, 0.19, 0.94, 1.02, 0.35, 1.02, 0.45], [1.03, 1.12, 0.97, 0.05, 0.69, 0.95, 1.37, 1.54], [0.56, 1.24, 0.6, 0.78, 1.79, 1.18, 1.51, 0.79], [0.68, 1.39, 1.67, 0.94, 1.17, 0.75, 1.86, 1.67], [1.81, 1.25, 0.39, 0.92, 0.17, 1.35, 0.75, 1.2], [1.43, 1.81, 1.19, 1.14, 1.89, 0.93, 0.68, 0.37], [0.23, 0.42, 0.93, 0.77, 1.55, 1.11, 0.7, 1.32]]
+  maximum_weight:                 [3.61, 5.18, 5.79, 4.48, 4.01, 5.48, 4.59, 3.1, 5.43, 3.03, 5.52, 3.56, 4.84, 4.36, 4.54, 4.27, 5.58, 3.23, 2.65, 3.39, 4.82, 5.5, 3.56, 5.38, 4.09, 3.19, 3.74, 4.93, 2.92, 4.45, 3.73, 3.29, 4.24, 3.65, 4.1, 2.56, 4.09, 4.88, 4.89, 4.95, 3.8, 5.66, 3.63, 4.77, 6.37, 4.96, 2.91, 4.33, 4.1, 2.32, 5.15, 5.05, 4.14, 4.05, 3.51, 2.33, 3.75, 2.18, 3.32, 3.37, 2.94, 3.61, 2.99, 4.06, 4.6, 4.8, 4.8, 4.05, 3.15, 3.43, 5.18, 3.87, 4.39, 2.87, 4.05, 3.86, 5.07, 2.69, 2.88, 3.48, 3.42, 4.45, 4.45, 3.99, 4.62, 3.69, 3.44, 5.31, 2.23, 4.3, 4.31, 3.74, 3.14, 3.45, 3.45, 4.63, 3.97, 4.55, 3.88, 3.59]
+  lambdas:                        [0.96,0.0371]
+  callback:                       KPCallbacks
+###########################################################################
+
+###########################################################################
+algorithm_config:                                       # config for QRL training
+  reuse_actors:                   True
+  num_gpus:                       0                     # number of gpus for each trial
+  num_rollout_workers:            1                     # number of worker for each trial. By ray default, every worker needs one cpu
+  num_envs_per_worker:            1                     # number of game enviroments for each worker
+  num_gpus_per_worker:            0                     # number of gpus for each worker
+  num_cpus_per_worker:            2                     # number of cpus for each worker
+  framework:                      torch                 # ray framework [torch, tensorflow]
+  ###########################################################################
+  lr:                         0.015
+    #- grid_search
+    #- float
+    #- [0.03,0.025,0.02]
+  # weight_decay: 
+  #   - grid_search
+  #   - float
+  #   - [0, 1.0e-4, 1.0e-5]
+  lr_output_scaling:          0.1  
+  num_layers:                   5            
+    # - grid_search   
+    # - int 
+    # - [9, 12]
+  ###########################################################################
+  mode:                           quantum               # select mode [classical, quantum, hybrid]
+  interface:                      torch                 # select pennylane interface, default: torch
+  diff_method:                    adjoint               # select pennylane diff_method [adjoing, backprop, ...] 
+  backend_name:                   lightning.qubit       # select pennylane backend [lightning.qubit, default.qubit, ...]
+  custom_optimizer:               Adam                  # select the classical optimizer [Adam, RMSprop, LBFGS, ...] 
+  ###########################################################################
+  vqc_type:                       [vqc_generator, 8]    # select vqc_generator or other circuit generator function + number of qubits
+  use_hadamard:                   True                  # Create equal superposition in the beginning
+  block_sequence:                 enc                   # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
+    # - grid_search
+    # - string
+    # - [enc, enc_var_ent]
+  encoding_type:                  graph_encoding        # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
+  graph_encoding_type:            #h-ppgl          # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
+    - grid_search
+    - string
+    - [s-ppgl, m-ppgl, h-ppgl,angular]
+  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
+  num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
+  quadratic_gate:                 ZZ                    # ZZ, XX, YY
+  linear_gate:                    RZ                    # RZ, RX, RY
+  annotations_gate:               RX                    # RZ, RX, RY
+  measurement_gate:               PauliZ                # PauliZ, PauliX, PauliY
+  variational_type:               RZ_RY                 # select the gate sequence [RZ_RY, RY_RZ]
+  num_variational_params:         2                     # select the number of params, so e.g. 2 for RZ_RY
+  init_variational_params:        1.0                   # select initialization of the variational parameters
+  init_variational_params_mode:   constant     # plus-zero-uniform, plus-plus-normal, plus-zero-normal
+  entangling_type:                chain                 # type of entanglement [chain, full, ...]
+  entangling_gate:                CZ                    # type of entanglement gate [CNOT, CZ, CH, ...]
+  measurement_type_actor:         exp                   # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  use_output_scaling_actor:       True                  # use output scaling [True, False]
+  init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
+  postprocessing_actor:           constant                     # select postprocessing (check the file postprocessing.py)
+  use_temperature:                False
+  output_scaling_schedule:        True
+  steps_for_output_scaling_update:    2000
+    #- grid_search
+    #- int
+    #- [1000,2000,5000,10000]
+  max_steps_output_scaling_update:    75000
+    #- grid_search
+    #- int
+    #- [75000,100000,150000]
+  output_scaling_update:              0.5
+    #- grid_search
+    #- float
+    #- [0.1,0.5,1]
+  ###########################################################################
+  noise:                                                # use noise during training
+    coherent:                     [False, 0.]           # bool + float for magnitude of used coherent noise
+    depolarizing:                 [False, 0.001]        # bool + float for magnitude of used depolarizing noise
+  layerwise_training:             False                 # layerwise training (DEPRECATED)
+  gradient_clipping:              False                 # gradient clipping (DEPRECATED)
+  use_classical_layer:            False                 # additional postprocessing (DEPRECATED)
+  layer_size:                     [64, 64]              # classical NN, max 3 layers with in as number of neurons in the according layer
+  activation_function:            relu                  # activation function of classical NN
+  weight_logging_interval:        5000                  # weight logging + plotting interval (DEPRECATED)
+  weight_plotting:                False                 # weight logging + plotting (DEPRECATED)
+  ###########################################################################
+  # More ray params
+  explore:                        True
+    # - grid_search
+    # - string
+    # - [False, True]
+###########################################################################
+
+
+evaluation:
+  set_seed:                       True 
+  seed:                           69
+  ###########################################################################
+  plotting:
+    mode:                         custom
+    path:                         logs/mvc_static/LinearRZ/4nodes_graph/2024-02-19--11-31-27_QRL_QPG
+  ###########################################################################
+  landscape_plotting:
+    mode:                         qrl
+    plot_name:                    qnn 4 qubits params=2 layer=1 
+    plot_title:                   qaoa 4 qubits params=2 layer=1 
+    qrl_config_path:              logs/qpg/uc/02_05/2024-02-05--12-06-29_QRL_QPG/
+    plot_path:                    logs/qpg/uc/02_05/2024-02-05--12-06-29_QRL_QPG/ #logs/UC/dynamic/2024-02-07--14-27-34/
+    center_params_path:           logs/qpg/uc/02_05/2024-02-05--12-06-29_QRL_QPG/QRL_PG_UC_demo_9cb93_00000_0_graph_encoding_type=eqc_2024-02-05_12-06-29/checkpoint_001000
+                          # e.g. qrl: 'logs/qpg/uc/01_15/2024-01-17--11-39-09_QRL_QPG/QRL_PG_UC_demo_a552e_00000_0_graph_encoding_type=eqc,num_layers=3_2024-01-17_11-39-09/checkpoint_001000'
+                          # e.g. qnn, qaoa, vqe: 'logs/comp/dynamic_5/2024-01-22--12-04-12/params_qnn_qubits_5_layer_5.csv'
+    center_params:                trained_model         # can either be 0, trained_model
+    evaluation_steps:             10                    # only required for qnn and qrl 
+    vqc_type:                     qaoa                  # NOT FUNCTION YET! TODO: Implement Custom Circuit qaoa, vqe, qrl, custom_circuit
+    num_layers:                   3                     # number of layers
+    num_params:                   10                    # number of parameters per layers
+    num_qubits:                   4                     # number of qubits
+    num_div:                      10                    # Number of divisions to search (granularity of the grid / number of data points)
+    scalor_1:                     1.0                   # set range for grid
+    scalor_2:                     1.0                   # if grid is 2-dimensional, different scalors can be use e.g. for gamma and beta
+    metric:                       accuracy              # z-axis for loss landscape for qrl [reward, accuracy], hard coded for qnn, vqe, qaoa
+    mark_optimal:                 [True, 10]            # mark points which have same value as second list entry
+    save_to_json:                 True                  # save losslandscape datapoints to json
+  ###########################################################################
+  algorithm_benchmarking:
+    alg_to_train:                 []
+    alg_to_evaluate:              [vqe, qaoa]
+    qrl_path:                     logs/qpg/uc/02_09/2024-02-08--12-11-08_QRL_QPG/QRL_PG_UC_c280e_00000_0_graph_encoding_type=eqc,/checkpoint_001000
+    qaoa_path:                    logs/UC/dynamic_10/2024-02-09--13-51-03/params_qaoa_qubits_10_layer_3_timestep_0.csv
+    vqe_path:                     logs/UC/dynamic_10/2024-02-09--13-51-03/params_vqe_qubits_10_layer_3_timestep_0.csv
+    optimizer_steps:              50
+    evaluation_steps:             10
+    num_qubits:                   10
+    layer:
+      layer_vqe:                  3
+      layer_qaoa:                 3
+      layer_qnn:                  3
+    initialization:
+      init_vqe:                   0.5
+      init_qaoa:                  0.1
+      init_qnn:                   0.1
+    lr:
+      lr_vqe:                     0.1
+      lr_qaoa:                    0.01
+      lr_qnn:                     0.1
+    params_vqe:                   2
+    params_qnn:                   10
+    plotting:
+      plot_vqe_probs:             True
+      plot_qaoa_probs:            True
+      plot_qnn_probs:             True                  # TODO
+###########################################################################
+  variance_calculation:   
+    qubits:                       [2, 4, 6, 8, 10, 12, 14, 16]
+    evaluations:                  100
+    logging_path:                 logs/variance
+    measurement_type_actor:       exp0
+    calculate_vars:               False
+    plot_vars:                    True
+    save_to_json:                 True
+    fig_name:                     variance calculation 
+    path:                         /home/users/kruse/quantum-computing/QRL/logs/variance/2024-02-08--17-14-01_variances
+    plot_keys:
+      # - var_all_gradients
+      - var_expecation
+      # - var_weights_L
+      # - var_input_scaling_L
+ 

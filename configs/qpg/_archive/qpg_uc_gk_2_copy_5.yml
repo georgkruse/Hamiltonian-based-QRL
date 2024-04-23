@@ -1,0 +1,130 @@
+type:                        QRL                   # choose a type: RL, GA, Hypernetwork, ...
+alg:                         QPG                  # name of the algorithm
+use_ray_alg:                 False                 # use custom algorithm or ray framework
+seed:                        42                   # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+constant_seed:               False                 # setting the same seed accross all runs
+
+mode:                        training             # select the mode you want to use: 'custom', 'training'
+trainer:                     default
+checkpoint_at_end:           False
+checkpoint_freq:             100
+ray_local_mode:              False                # set local_mode of ray to True for debugging
+load_path:                   some/path/weights    # provide a model weight path if you want to do continue from stopped training
+
+ray_logging_path:            logs/qpg/uc/02_02    # logging directory
+total_num_cpus:              6                    # total number of cpus
+total_num_gpus:              0                    # total number of gpus
+ray_num_trial_samples:       3                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:         1500                 # number of training iterations
+
+
+env_type:                     gym_game
+env:                          UC_demo
+env_config:
+  num_generators:             10
+  mode:                       dynamic_10 # static # dynamic # simple
+  generator_outputs:          [400, 200] # 100, 100, 100, 100, 100, 100, 400, 600] #, 100, 100, 100, 100, 100]
+  generator_constraints:      [3, 3, 0, 0, 3, 3, 0, 0]
+  up_time:                    [2, 2, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0]
+  down_time:                  [1, 1, 0, 0, 1, 1, 0, 0, 2, 2, 0, 0]
+  power_scaling:              0.00125
+  lambda:                     25.0
+  power_demands:              [400, 200, 0, 600, 400, 200, 0, 600, 400, 200, 0, 600]
+  # power_demands:              [0,0,0,0,0,0,0,0,0,0,0]
+  # power_demands:              [400,400,400,400,400,400,400,400,400]
+  episode_length:             10
+  constraint_mode:            demand_constraint
+  reward_mode:                optimal
+    # - grid_search
+    # - string
+    # - [optimal_spike, optimal_sqrt]
+  action_space_type:          multi_discrete
+  num_stacked_timesteps:      1
+  profiles_df_test:           None
+  path:                       /home/users/kruse/quantum-computing/QRL
+
+algorithm_config:
+  reuse_actors:                   True
+  num_gpus:                       0                     # number of gpus for each trial
+  num_rollout_workers:            1                     # number of worker for each trial. By ray default, every worker needs one cpu
+  num_envs_per_worker:            1                     # number of game enviroments for each worker
+  num_gpus_per_worker:            0                     # number of gpus for each worker
+  num_cpus_per_worker:            2                     # number of cpus for each worker
+  framework:                      torch                 # ray framework [torch, tensorflow]
+  ###########################################################################
+  lr:                             0.025                 # select lr for nn, variational params and input scaling params
+  lr_output_scaling:              0.1                   # select lr for output scaling params
+  num_layers:                     6                     # select number of layers of vqc (layer nn defined below)
+  ###########################################################################
+  mode:                           quantum               # select mode [classical, quantum, hybrid]
+  interface:                      torch                 # select pennylane interface, default: torch
+  diff_method:                    adjoint               # select pennylane diff_method [adjoing, backprop, best, ...] 
+  backend_name:                   lightning.qubit       # select pennylane backend [lightning.qubit, default.qubit, ...]
+  custom_optimizer:               Adam                  # select the classical optimizer [Adam, RMSprop, LBFGS, ...] 
+  ###########################################################################
+  vqc_type:                       [vqc_generator, 10]   # select vqc_generator or other circuit generator function + number of qubits
+  use_hadamard:                   True                  # Create equal superposition in the beginning
+  block_sequence:                 enc                   # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
+    # - grid_search
+    # - string
+    # - [enc, enc_var_ent]
+  encoding_type:                  graph_encoding        # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
+  graph_encoding_type:            #eqc                  # if encoding_type=graph_encoding, than select [eqc, neqc, half-neqc, linear-eqc, ...]
+    - grid_search
+    - string
+    - [eqc, neqc, half-neqc, linear-eqc, linear-neqc, hwe]
+  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
+  num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
+  variational_type:               RZ_RY                 # select the gate sequence [RZ_RY, RY_RZ]
+  num_variational_params:         2                     # select the number of params, so e.g. 2 for RZ_RY
+  init_variational_params:        0.1                   # select initialization of the variational parameters
+  init_variational_params_mode:   plus-zero-uniform     # plus-zero-uniform, plus-plus-normal, plus-zero-normal
+  measurement_type_actor:         exp                   # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  entangling_type:                chain                 # type of entanglement [chain, full, ...]
+  entangling_gate:                CZ                    # type of entanglement gate [CNOT, CZ, ...]
+  use_output_scaling_actor:       True                  # use output scaling [True, False]
+  init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
+  postprocessing_actor:           1                     # select postprocessing (check the file postprocessing.py)
+  ###########################################################################
+  noise:
+    coherent:                 [False, 0.]
+    depolarizing:             [False, 0.001]
+  layerwise_training:         False
+  gradient_clipping:          False
+  use_classical_layer:        False
+  layer_size:                 [64, 64]
+  activation_function:        relu      
+  weight_logging_interval:    5000
+  weight_plotting:            False
+  ###########################################################################
+  # More ray params
+  explore:                    True
+    # - grid_search
+    # - string
+    # - [False, True]
+  
+evaluation:
+  set_seed: True 
+  seed:       694
+  plotting:
+    mode:     qrl
+    plot_name: qrl 5 qubits params=2 layer=2 acc
+    center_params:  0         # can either be 0, trained_model
+    center_params_path: None
+                                          # eg. qrl: 'logs/qpg/uc/01_15/2024-01-17--11-39-09_QRL_QPG/QRL_PG_UC_demo_a552e_00000_0_graph_encoding_type=eqc,num_layers=3_2024-01-17_11-39-09/checkpoint_001000'
+                                          # e.g. qnn, qaoa, vqe: 'logs/comp/dynamic_5/2024-01-22--12-04-12/params_qnn_qubits_5_layer_5.csv'
+    number_dimensions: 2
+    evaluation_steps:   10 # only required for qnn and qrl 
+    vqc_type:                 qaoa, vqe, qrl, custom_circuit
+    num_div:  50 # Number of divisions to search (granularity of the grid / number of data points)
+    metric:     accuracy #, reward, loss
+    mark_optimal:   [True, 10]
+    save_to_json:   False
+  variance_calculation:   
+ 
+
+
+  
+
+  

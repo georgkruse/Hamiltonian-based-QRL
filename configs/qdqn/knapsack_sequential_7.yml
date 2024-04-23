@@ -1,0 +1,220 @@
+type:                             QRL                   # choose a type: RL, GA, Hypernetwork (DEPRECATED)
+alg:                              QDQN                   # name of the algorithm
+seed:                             42                    # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+constant_seed:                    False                 # setting the same seed accross all runs
+checkpoint_at_end:                True                 # create checkpoint at the end of training
+checkpoint_freq:                  1000                  # set checkpoint frequency, depends on training iterations
+ray_local_mode:                   True                 # set local_mode of ray to True for debugging
+ray_logging_path:                 logs/knapsack/sequential/dqn/test         # logging directory
+total_num_cpus:                   12                    # total number of cpus
+total_num_gpus:                   0                     # total number of gpus
+ray_num_trial_samples:            2                     # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:              5                   # number of training iterations
+run_sections:                                           # specifiy the code you want to run
+                                - qrl_training
+                                #- plotting
+                                # - landscape_plotting
+                                # - algorithm_benchmarking
+                                # - variance_calculation
+
+###########################################################################
+env:                              KNAPSACKSEQUENTIAL                        # Game config               
+env_config:
+  values:                         [20,10,4,18,5,9,18]
+  weights:                        [15,10,3,17,9,10,17]
+  maximum_weight:                 37
+  lambdas:                        [0.96,0.0371]
+###########################################################################
+
+###########################################################################
+algorithm_config:                                       # config for QRL training
+  reuse_actors:                   True
+  num_gpus:                       0                     # number of gpus for each trial
+  num_rollout_workers:            1                     # number of worker for each trial. By ray default, every worker needs one cpu
+  num_envs_per_worker:            1                     # number of game enviroments for each worker
+  num_gpus_per_worker:            0                     # number of gpus for each worker
+  num_cpus_per_worker:            2                     # number of cpus for each worker
+  framework:                      torch                 # ray framework [torch, tensorflow]
+  ###########################################################################
+  lr:                         0.001
+  # weight_decay: 
+  #   - grid_search
+  #   - float
+  #   - [0, 1.0e-4, 1.0e-5]
+  lr_output_scaling:          0.1  
+  num_layers:                   5            
+    # - grid_search   
+    # - int 
+    # - [9, 12]
+  
+  target_network_update_freq: 5
+
+  exploration_config:
+    epsilon_timesteps: 5000
+    final_epsilon: 0.01
+    initial_epsilon: 1
+    type: CustomEpsilonGreedy
+
+  replay_buffer_config:
+    capacity: 10000
+    replay_sequence_length: 1
+    type: MultiAgentReplayBuffer
+  
+  num_steps_sampled_before_learning_starts: 1
+  
+  gamma: 0.99
+
+  dueling: False
+
+  double_q : False
+
+  tau : 1
+
+  td_error_loss_fn: mse
+
+  grad_clip: None
+
+  action_masking: True
+
+  train_batch_size: 16
+  # blocks: 
+  #   - choice 
+  #   - string
+  #   - [[[[0, 1], [2, 3]], [[0, 1], [2], [3]]]]
+  ###########################################################################
+  mode:                           quantum               # select mode [classical, quantum, hybrid]
+  interface:                      torch                 # select pennylane interface, default: torch
+  diff_method:                    adjoint               # select pennylane diff_method [adjoing, backprop, ...] 
+  backend_name:                   lightning.qubit       # select pennylane backend [lightning.qubit, default.qubit, ...]
+  custom_optimizer:               Adam                  # select the classical optimizer [Adam, RMSprop, LBFGS, ...] 
+  _disable_preprocessor_api:       True
+  ###########################################################################
+  vqc_type:                       [vqc_generator, 7]    # select vqc_generator or other circuit generator function + number of qubits
+  use_hadamard:                   True                  # Create equal superposition in the beginning
+  block_sequence:                 enc                   # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
+    # - grid_search
+    # - string
+    # - [enc, enc_var_ent]
+  encoding_type:                  graph_encoding        # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
+  graph_encoding_type:            #s-ppgl          # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
+    - grid_search
+    - string
+    - [s-ppgl, m-ppgl, h-ppgl]
+  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
+  num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
+  quadratic_gate:                 XX                    # ZZ, XX, YY
+  linear_gate:                    RX                    # RZ, RX, RY
+  annotations_gate:               RZ                    # RZ, RX, RY
+  measurement_gate:               PauliX                # PauliZ, PauliX, PauliY
+  variational_type:               RZ_RY                 # select the gate sequence [RZ_RY, RY_RZ]
+  num_variational_params:         2                     # select the number of params, so e.g. 2 for RZ_RY
+  init_variational_params:        0.1                   # select initialization of the variational parameters
+  init_variational_params_mode:   plus-zero-uniform     # plus-zero-uniform, plus-plus-normal, plus-zero-normal
+  entangling_type:                chain                 # type of entanglement [chain, full, ...]
+  entangling_gate:                CZ                    # type of entanglement gate [CNOT, CZ, CH, ...]
+  measurement_type_actor:         exp                   # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  use_output_scaling_actor:       True                  # use output scaling [True, False]
+  init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
+  postprocessing_actor:           constant                     # select postprocessing (check the file postprocessing.py)
+  problem_scaling:                True
+  output_scaling_schedule: False
+  ###########################################################################
+  noise:                                                # use noise during training
+    coherent:                     [False, 0.]           # bool + float for magnitude of used coherent noise
+    depolarizing:                 [False, 0.001]        # bool + float for magnitude of used depolarizing noise
+  layerwise_training:             False                 # layerwise training (DEPRECATED)
+  gradient_clipping:              False                 # gradient clipping (DEPRECATED)
+  use_classical_layer:            False                 # additional postprocessing (DEPRECATED)
+  layer_size:                     [64, 64]              # classical NN, max 3 layers with in as number of neurons in the according layer
+  activation_function:            relu                  # activation function of classical NN
+  weight_logging_interval:        5000                  # weight logging + plotting interval (DEPRECATED)
+  weight_plotting:                False                 # weight logging + plotting (DEPRECATED)
+  ###########################################################################
+  # More ray params
+  explore:                        True
+    # - grid_search
+    # - string
+    # - [False, True]
+###########################################################################
+
+
+evaluation:
+  set_seed:                       True 
+  seed:                           69
+  ###########################################################################
+  plotting:
+    mode:                         custom
+    path:                         logs/mvc_static/LinearRZ/4nodes_graph/2024-02-19--11-31-27_QRL_QPG
+  ###########################################################################
+  landscape_plotting:
+    mode:                         qrl
+    plot_name:                    qnn 4 qubits params=2 layer=1 
+    plot_title:                   qaoa 4 qubits params=2 layer=1 
+    qrl_config_path:              logs/qpg/uc/02_05/2024-02-05--12-06-29_QRL_QPG/
+    plot_path:                    logs/qpg/uc/02_05/2024-02-05--12-06-29_QRL_QPG/ #logs/UC/dynamic/2024-02-07--14-27-34/
+    center_params_path:           logs/qpg/uc/02_05/2024-02-05--12-06-29_QRL_QPG/QRL_PG_UC_demo_9cb93_00000_0_graph_encoding_type=eqc_2024-02-05_12-06-29/checkpoint_001000
+                          # e.g. qrl: 'logs/qpg/uc/01_15/2024-01-17--11-39-09_QRL_QPG/QRL_PG_UC_demo_a552e_00000_0_graph_encoding_type=eqc,num_layers=3_2024-01-17_11-39-09/checkpoint_001000'
+                          # e.g. qnn, qaoa, vqe: 'logs/comp/dynamic_5/2024-01-22--12-04-12/params_qnn_qubits_5_layer_5.csv'
+    center_params:                trained_model         # can either be 0, trained_model
+    evaluation_steps:             10                    # only required for qnn and qrl 
+    vqc_type:                     qaoa                  # NOT FUNCTION YET! TODO: Implement Custom Circuit qaoa, vqe, qrl, custom_circuit
+    num_layers:                   3                     # number of layers
+    num_params:                   10                    # number of parameters per layers
+    num_qubits:                   4                     # number of qubits
+    num_div:                      10                    # Number of divisions to search (granularity of the grid / number of data points)
+    scalor_1:                     1.0                   # set range for grid
+    scalor_2:                     1.0                   # if grid is 2-dimensional, different scalors can be use e.g. for gamma and beta
+    metric:                       accuracy              # z-axis for loss landscape for qrl [reward, accuracy], hard coded for qnn, vqe, qaoa
+    mark_optimal:                 [True, 10]            # mark points which have same value as second list entry
+    save_to_json:                 True                  # save losslandscape datapoints to json
+  ###########################################################################
+  algorithm_benchmarking:
+    alg_to_train:                 []
+    alg_to_evaluate:              [vqe, qaoa]
+    qrl_path:                     logs/qpg/uc/02_09/2024-02-08--12-11-08_QRL_QPG/QRL_PG_UC_c280e_00000_0_graph_encoding_type=eqc,/checkpoint_001000
+    qaoa_path:                    logs/UC/dynamic_10/2024-02-09--13-51-03/params_qaoa_qubits_10_layer_3_timestep_0.csv
+    vqe_path:                     logs/UC/dynamic_10/2024-02-09--13-51-03/params_vqe_qubits_10_layer_3_timestep_0.csv
+    optimizer_steps:              50
+    evaluation_steps:             10
+    num_qubits:                   10
+    layer:
+      layer_vqe:                  3
+      layer_qaoa:                 3
+      layer_qnn:                  3
+    initialization:
+      init_vqe:                   0.5
+      init_qaoa:                  0.1
+      init_qnn:                   0.1
+    lr:
+      lr_vqe:                     0.1
+      lr_qaoa:                    0.01
+      lr_qnn:                     0.1
+    params_vqe:                   2
+    params_qnn:                   10
+    plotting:
+      plot_vqe_probs:             True
+      plot_qaoa_probs:            True
+      plot_qnn_probs:             True                  # TODO
+###########################################################################
+  variance_calculation:   
+    qubits:                       [2, 4, 6, 8, 10, 12, 14, 16]
+    evaluations:                  100
+    logging_path:                 logs/variance
+    measurement_type_actor:       exp0
+    calculate_vars:               False
+    plot_vars:                    True
+    save_to_json:                 True
+    fig_name:                     variance calculation 
+    path:                         /home/users/kruse/quantum-computing/QRL/logs/variance/2024-02-08--17-14-01_variances
+    plot_keys:
+      # - var_all_gradients
+      - var_expecation
+      # - var_weights_L
+      # - var_input_scaling_L
+ 
+
+
+  
+
+  

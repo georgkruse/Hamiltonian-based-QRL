@@ -1,0 +1,116 @@
+type:                        QRL                   # choose a type: RL, GA, Hypernetwork, ...
+alg:                         QPPO                  # name of the algorithm
+use_ray_alg:                 False                 # use custom algorithm or ray framework
+seed:                        42                   # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+
+mode:                        training             # select the mode you want to use: 'custom', 'training'
+trainer:                     default
+checkpoint_at_end:           False
+checkpoint_freq:             50
+ray_local_mode:              False                # set local_mode of ray to True for debugging
+load_path:                   some/path/weights    # provide a model weight path if you want to do continue from stopped training
+
+ray_logging_path:            logs/trainability/lunarlander/06_27      # logging directory
+total_num_cpus:              24                   # total number of cpus
+total_num_gpus:              0                    # total number of gpus
+ray_num_trial_samples:       3                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:         50                  # number of training iterations
+
+env_type:                    gym_game
+env:                         LunarLander-v2
+env_config:
+  mode:                      classical                   
+
+data_path: /home/users/kruse/quantum-computing/QRL/lunarlander_data_100.csv
+
+# Additional custom parameters
+# withOUT rescaling of critic 
+algorithm_config:
+  reuse_actors:               True
+  num_gpus:                   0                   # number of gpus for each trial
+  num_workers:                1                   # number of worker for each trial. By ray default, every worker needs one cpu
+  num_envs_per_worker:        1                   # number of game enviroments for each worker
+  num_gpus_per_worker:        0                   # number of worker for each trial.
+  num_cpus_per_worker:        1                # number of worker for each trial.
+  constant_seed:              False 
+  ###########################################################################
+  lr:                        0.0005
+    # - grid_search
+    # - [0.001, 0.0001, 0.00001] 
+  lr_output_scaling:         0.005
+    # - grid_search
+    # - [0.01, 0.001]  
+  # lr_schedule:
+  #   - grid_search
+  #   - [[[0, 0.001], [600000, 0.0001]],
+  #      [[0, 0.001], [300000, 0.0001]],
+  #      [[0, 0.0005], [600000, 0.0001]],
+  #      [[0, 0.0005], [300000, 0.0001]]]
+  num_layers:                 20             
+    # - grid_search    
+    # - [3, 5]
+  ###########################################################################
+  mode:                       quantum # classical, quantum, hybrid
+  interface:                  torch
+  diff_method:                adjoint                             
+  backend_name:               lightning.qubit
+  custom_optimizer:           Adam   
+    # - grid_search
+    # - [Adam, RMSprop]
+  ###########################################################################
+  vqc_type:                   vqc_generator 
+  use_single_vqc:             False
+    # - grid_search
+    # - [True, False]
+  use_hadamard:               True
+  block_sequence:             enc_var_ent
+  encoding_type:              angular_classical
+    # - grid_search
+    # - [angular_classical, angular_arctan]
+  use_input_scaling:          True
+  num_scaling_params:         2
+  entangling_type:            chain
+    # - grid_search
+    # - [chain_reverse, chain]
+  entangling_gate:            CNOT
+  variational_type:           RZ_RY
+  num_variational_params:     2
+  measurement_type_actor:     exp             # type of measurement (check the python files for examples) (exp for discrete)
+  measurement_type_critic:    exp
+  use_output_scaling_actor:   True
+  init_output_scaling_actor:  [1.]
+  use_output_scaling_critic:  True                     # Uses output scaling  
+  init_output_scaling_critic: [1.] 
+  postprocessing:             1
+  postprocessing_critic:      weighted_sum
+  ###########################################################################
+  init_params:                0.1 
+  init_params_mode:           plus-zero-normal    # plus-zero-uniform #, plus-plus-normal. plus-zero-normal
+  layerwise_training:         False
+  gradient_clipping:          False
+  use_classical_layer:        False
+  # normalize_batch:
+  #   - grid_search
+  #   - [True, False]
+  layer_size:                 16
+    # - grid_search
+    # - [8, 16, 32, 64]
+  weight_logging_interval:    10000
+  weight_plotting:            True
+  ###########################################################################
+  train_batch_size:           4000
+  num_sgd_iter:               20
+  sgd_minibatch_size:         64
+  rollout_fragment_length:    200
+  gamma:                      0.99
+  lambda:                     0.99
+  # kl_coeff:                   1.
+  vf_loss_coeff:              0.5
+  clip_param:                 0.2
+  # grad_clip:                  3
+  vf_clip_param:              50000
+  # batch_mode:                 complete_episodes
+  observation_filter:         MeanStdFilter
+
+
+

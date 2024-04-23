@@ -1,0 +1,117 @@
+type:                        QRL                   # choose a type: RL, GA, Hypernetwork, ...
+alg:                         QPG                  # name of the algorithm
+use_ray_alg:                 False                 # use custom algorithm or ray framework
+seed:                        42                   # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+
+mode:                        training             # select the mode you want to use: 'custom', 'training'
+trainer:                     default
+checkpoint_at_end:           False
+checkpoint_freq:             200
+ray_local_mode:              False                # set local_mode of ray to True for debugging
+load_path:                   some/path/weights    # provide a model weight path if you want to do continue from stopped training
+
+ray_logging_path:            logs/qpg/cartpole/12_04        # logging directory
+total_num_cpus:              14                 # total number of cpus
+total_num_gpus:              0                    # total number of gpus
+ray_num_trial_samples:       2                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:         500                  # number of training iterations
+
+
+env_type:                     gym_game
+env:                          CartPole-v1
+env_config:
+  mode:                       classical
+
+
+# Additional custom parameters
+# withOUT rescaling of critic 
+algorithm_config:
+  reuse_actors:             True
+  num_gpus:                   0                   # number of gpus for each trial
+  num_rollout_workers:        1                  # number of worker for each trial. By ray default, every worker needs one cpu
+  num_envs_per_worker:        1                   # number of game enviroments for each worker
+  num_gpus_per_worker:        0                   # number of worker for each trial.
+  num_cpus_per_worker:        0.2                # number of worker for each trial.
+  constant_seed:              False 
+  framework:                  torch
+  ###########################################################################
+  lr:                         #0.005
+    - grid_search
+    - float
+    - [0.01, 0.005, 0.001] 
+  # weight_decay: 
+  #   - grid_search
+  #   - float
+  #   - [0, 1.0e-4, 1.0e-5]
+  lr_output_scaling:          0.01
+    # - grid_search
+    # - [0.1, 0.01]  
+  num_layers:                   3             
+    # - grid_search   
+    # - int 
+    # - [9, 12]
+  # blocks: 
+  #   - choice 
+  #   - string
+  #   - [[[[0, 1], [2, 3]], [[0, 1], [2], [3]]]]
+  ###########################################################################
+  mode:                       classical # classical, quantum, hybrid
+    # - grid_search
+    # - string
+    # - [classical, quantum]
+  interface:                  torch
+  diff_method:                adjoint                             
+  backend_name:               lightning.qubit
+  custom_optimizer:           Adam #Adam   
+  ###########################################################################
+  vqc_type:                   [vqc_generator, 4] #qcnn_circuit_pendulum # triple_circuit
+    # - grid_search
+    # - list
+    # - [[vqc_generator, 6], [vqc_double, 6]] #qcnn_circuit_pendulum # vqc_generator # relu_circuit_pendulum 
+  use_hadamard:               True
+  block_sequence:             enc_var_ent
+  encoding_type:              angular_classical # layerwise_arctan_sigmoid #angular_classical
+    # - grid_search
+    # - string
+    # - [layerwise_arctan, layerwise_sigmoid, layerwise_arctan_sigmoid, layerwise_sigmoid_arctan]
+  use_input_scaling:          True
+  num_scaling_params:         2
+  entangling_type:            chain
+    # - grid_search
+    # - [full, chain]
+  entangling_gate:            CNOT
+    # - grid_search
+    # - string
+    # - [CZ, CNOT]
+  variational_type:           RZ_RY
+  num_variational_params:     2
+  measurement_type_actor:     exp             # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  use_output_scaling_actor:   True
+  init_output_scaling_actor:  [1.]
+  postprocessing_actor:       1
+  ###########################################################################
+  init_params:                0.1 
+  init_params_mode:           plus-zero-normal    # plus-zero-uniform #, plus-plus-normal. plus-zero-normal
+  layerwise_training:         False
+  gradient_clipping:          False
+  use_classical_layer:        False
+  layer_size:                 [16, 16]
+    # - grid_search
+    # - list
+    # - [[8], [16], [32], [64], [8, 8], [16, 16], [32, 32], [64, 64], [8, 16], [8, 32], [8, 64], [16, 32], [16, 64], [32, 64]]
+  activation_function:      relu  
+    # - grid_search
+    # - string
+    # - [relu, leaky_relu, tanh]         
+  weight_logging_interval:    5000
+  weight_plotting:            True
+  ###########################################################################
+  # More ray params
+  explore:      True
+    # - grid_search
+    # - string
+    # - [False, True]
+  noise:
+    coherent: [False, 0.]
+    depolarizing: [False, 0.001]
+  

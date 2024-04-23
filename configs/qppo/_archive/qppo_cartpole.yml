@@ -1,0 +1,40 @@
+type:                     QRL                   # choose a type: RL, GA, Hypernetwork, ...
+alg:                      PPO                 # name of the algorithm
+use_ray_alg:              True                # use custom algorithm or ray framework
+seed:                     42                  # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+
+mode:                     training             # select the mode you want to use: 'custom', 'training'
+ray_local_mode:           False                 # set local_mode of ray to True for debugging
+load_path:                some/path/weights    # provide a model weight path if you want to do continue from stopped training
+
+ray_logging_path:         logs/qppo            # logging directory
+total_num_cpus:           20                    # total number of cpus
+total_num_gpus:           0                    # total number of gpus
+ray_num_trial_samples:    1                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+ray_num_gpus_per_trial:   0                    # number of gpus for each trial 
+training_iterations:      500                  # number of training iterations
+
+# This works only for Ray Trainers!
+num_workers_per_trial:    1                    # number of worker for each trial. By ray default, every worker needs one cpu
+num_envs_per_worker:      1                    # number of game enviroments for each worker
+num_cpus_per_worker:      0.25                    # number of worker for each trial.            
+num_gpus_per_worker:      0                    # number of worker for each trial.            
+
+lr: [1.e-1, 5.e-1, 5.e-2, 1.e-2, 5.e-3, 1.e-3]
+
+# Additional custom parameters
+input_config:
+  constant_seed: False 
+  type: # classical, quantum, hybrid
+    - choice
+    - [quantum]
+  backend_type: pennylane                             # This doesn't work yet
+  backend_name: default.qubit
+  optimizer: Adam
+  init_params: 1.57 
+  init_params_mode: plus-zero-uniform #plus-zero-uniform #, plus-plus-normal. plus-zero-normal
+  num_qubits: 4
+  l: 1
+  num_layers: 5
+  layer_size: 16
+

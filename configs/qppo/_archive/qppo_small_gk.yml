@@ -1,0 +1,77 @@
+type:                     RL                   # choose a type: RL, GA, Hypernetwork, ...
+alg:                      QPPO                 # name of the algorithm
+use_ray_alg:              False                # use custom algorithm or ray framework
+seed:                     420                  # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+
+mode:                     training             # select the mode you want to use: 'custom', 'training'
+ray_local_mode:           False                 # set local_mode of ray to True for debugging
+load_path:                some/path/weights    # provide a model weight path if you want to do continue from stopped training
+
+ray_logging_path:         logs/qppo            # logging directory
+total_num_cpus:           4                    # total number of cpus
+total_num_gpus:           0                    # total number of gpus
+ray_num_trial_samples:    3                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+ray_num_gpus_per_trial:   0                    # number of gpus for each trial 
+training_iterations:      300                  # number of training iterations
+
+# This works only for Ray Trainers!
+num_workers_per_trial:    2                    # number of worker for each trial. By ray default, every worker needs one cpu
+num_envs_per_worker:      1                    # number of game enviroments for each worker
+num_gpus_per_worker:      0                    # number of worker for each trial.            
+
+# Evaluation parameters
+evaluation:
+  eval:                      False                 # perform evaluation or not (True or False).
+  evaluation_interval:       10                    # interval to perform evaluation. If interval 2, it will follow as train, train, eval, train... 
+  evaluation_num_workers:    1
+  evalutation_iteration:     10
+  render:                    False                 # render results of evaluation (only for custom evalution fuction).
+  custom_function:           False                # use custom evaluation function or not.
+
+# List of hyperparameters
+hyperparameters: 
+  train_batch_size:
+    range:  [300]
+    train_batch_size_sampling: choice
+    train_batch_size_schedule:                                  # "I want to start after an time-offset at lr_start and decrease it over lr_time steps to lr_end. 
+      use:                   False                # After the lr_time it should stay at lr_end." If schedule and hyperparameter learning rate sampling 
+      offset:                [0]                  # is used, only mode 'choice' can be used, and the lists have to be of the same size. The first, second, 
+      time:                  [5e5]                # third ... element of the lists are sampled as a schedule together. If elements are missing, they are
+      end:                   [1e-6, 1e-6, 1e-7]   # taken as the last element of the corresponding lists.        
+  # Hyperparameter tuning learning rate
+  lr:                            
+    range:                   [5e-2, 5e-3, 1e-3, 5e-4, 1e-4, 5e-5]             # list of learning rates, if sampling type is uniform, first two elements are taken.
+    lr_sampling:             choice          # sampling type ('choice', 'grid_search', 'uniform')
+    lr_schedule:                                  # "I want to start after an time-offset at lr_start and decrease it over lr_time steps to lr_end. 
+      use:                   False                # After the lr_time it should stay at lr_end." If schedule and hyperparameter learning rate sampling 
+      offset:                [0]                  # is used, only mode 'choice' can be used, and the lists have to be of the same size. The first, second, 
+      time:                  [5e5]                # third ... element of the lists are sampled as a schedule together. If elements are missing, they are
+      end:                   [1e-6, 1e-6, 1e-7]   # taken as the last element of the corresponding lists.       
+                                              
+
+# Additional custom parameters
+input_config:
+  constant_seed:            False 
+  type: classical
+  backend_type: pennylane                             # This doesn't work yet
+  backend_name: default.qubit
+  shots: 1024         # This doesn't work yet
+  optimizer: 
+    range: [Adam]
+    sampling: choice
+  init_params: 
+    range: [1.] # Default 0.011
+    sampling: choice
+  num_qubits: 4
+  num_layers: 
+    range: [2]
+    sampling: choice
+  multi_l: 1                
+  endcoding: [RY, RZ]                           # This doesn't work yet
+  parameter: [RX, RY, RZ]         # This doesn't work yet
+  layer_size: 32
+  hyperparameters:
+    gradient_coeff: 1             # list of entropy coefficients, if sampling type is uniform, first two elements are taken.
+    
+
+
