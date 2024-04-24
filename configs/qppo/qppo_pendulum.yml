@@ -60,11 +60,10 @@ algorithm_config:                                       # config for QRL trainin
     # - grid_search
     # - string
     # - [s-ppgl, h-ppgl, m-ppgl] #, s-ppgl-linear, m-ppgl-linear]
-  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  use_input_scaling_actor:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
   init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
-    # - grid_search
-    # - list
-    # - [[1.], [0.1]]
+  use_input_scaling_critic:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  init_input_scaling_critic:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
   num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
   quadratic_gate:                 ZZ                    # ZZ, XX, YY
   linear_gate:                    RZ                    # RZ, RX, RY

@@ -470,41 +470,11 @@ class QuantumDQN_Model(TorchModelV2,nn.Module,ABC):
                                                     nn.Linear(in_features=self.layer_size[2], out_features=self.num_outputs))
                 
                 
-    def set_layerwise_training(self):
-
-        if self.training:
-            if self.reset:
-                self.reset = False
-                self.local_counter = 0
-                self.layer_counter = 0
-                self.global_counter = 0
-
-            iters = 240
-            interval = iters / self.num_layers
-
-            for i in range(self.num_layers):
-                if i == self.local_counter:
-                    self._parameters[f'weights_actor_{i}'].requires_grad = True
-                else:
-                    self._parameters[f'weights_actor_{i}'].requires_grad = False
-
-            self.counter += 1
-            self.local_counter +=1
-
-            if self.local_counter >= interval:
-                self.layer_counter += 1
-                self.local_counter = 0
-
-            if self.counter >= iters:
-                self.reset = True
     
     def forward(self, input_dict, state, seq_lens):
         
         state = input_dict['obs']
 
-        # Set gradients in layers to True/False if layerwise training
-        if self.layerwise_training:
-            self.set_layerwise_training()
 
         if self.mode == 'quantum':
 
@@ -656,116 +626,3 @@ class QuantumDQN_Model(TorchModelV2,nn.Module,ABC):
         
         return logits, []
 
-    def metrics(self):
-
-        if not hasattr(self, 'writer'):
-            self.writer =  SummaryWriter(log_dir='weights')
-            self.t = -1
-        self.t += 1
-
-        if self.mode == 'quantum':
-            if self.t % self.weight_logging_interval == 0:
-                    
-                if self.weight_plotting:
-                    
-                    iteration = self.t                  
-                    fig, ax_a = plt.subplots(figsize=(26,8))
-
-                    # Then do actor
-                    vqc_weights, vqc_grads = [], []
-                    params_shape = (self.num_params+self.num_scaling_params)*self.num_layers
-
-                    if self.use_output_scaling_actor:
-                        params_shape +=1
-
-                    for i in range(self.num_layers):
-                        
-                        if self.use_input_scaling:
-                            vqc_weights.append(np.reshape(self._parameters[f'input_scaling_actor_{i}'].data, (self.num_qubits, self.num_scaling_params)))
-                            if self._parameters[f'input_scaling_actor_{i}'].grad == None:
-                                vqc_grads.append(np.zeros((self.num_qubits,self.num_params)))
-                            else:
-                                vqc_grads.append(np.reshape(self._parameters[f'input_scaling_actor_{i}'].grad, (self.num_qubits, self.num_scaling_params)))
-                        
-                        vqc_weights.append(np.reshape(self._parameters[f'weights_actor_{i}'].data, (self.num_qubits, self.num_params)))
-                        if self._parameters[f'weights_actor_{i}'].grad == None:
-                            vqc_grads.append(np.zeros((self.num_qubits,self.num_params)))
-                        else:
-                            vqc_grads.append(np.reshape(self._parameters[f'weights_actor_{i}'].grad, (self.num_qubits, self.num_params)))
-                        
-                    if self.use_output_scaling_actor:
-                        if self.num_qubits - self.output_scaling_actor.data.shape[0] != 0:
-                            padding = self.num_qubits - self.output_scaling_actor.data.shape[0] 
-                            vqc_weights.append(np.concatenate([self.output_scaling_actor.data, np.zeros(padding)])[:,np.newaxis])
-                            vqc_grads.append(np.concatenate([self.output_scaling_actor.grad, np.zeros(padding)])[:,np.newaxis])
-                        else:
-                            vqc_weights.append(np.full(self.num_qubits, self.output_scaling_actor.data)[:,np.newaxis])
-                            vqc_grads.append(np.full(self.num_qubits, self.output_scaling_actor.grad)[:,np.newaxis])
-                        
-                    weights_actor = np.hstack(vqc_weights) #, (params_shape, self.num_qubits))
-                    grads_actor = np.hstack(vqc_grads) #, (params_shape, self.num_qubits))
-
-                    abs_grads = np.abs(grads_actor)
-                    im_a = ax_a.imshow(abs_grads, aspect='auto')
-
-                    labels_qubits = [f'qubits_{x}' for x in range(self.num_qubits)]
-                    labels_layers = []
-
-                    for x in range(self.num_layers):
-                        if self.use_input_scaling:
-                            labels_layers.append(f'layer_{x}_input_scaling_RX')
-
-                        labels_layers.append(f'layer_{x}_weights_RZ')
-                        labels_layers.append(f'layer_{x}_weights_RY')
-
-                    if self.use_output_scaling_actor:
-                        labels_layers.append(f'output_scaling')
-
-                    # Show all ticks and label them with the respective list entries
-                    ax_a.set_xticks(np.arange(params_shape), labels=labels_layers)
-                    ax_a.set_yticks(np.arange(self.num_qubits), labels=labels_qubits)
-
-                    # # Rotate the tick labels and set their alignment.
-                    plt.setp(ax_a.get_xticklabels(), rotation=45, ha="right",
-                            rotation_mode="anchor")
-
-                    # Loop over data dimensions and create text annotations.
-                    for i in range(self.num_qubits):
-                        for j in range(params_shape):
-                            text = ax_a.text(j, i-0.2, f'{weights_actor[i, j]:.3f}',
-                                        ha="center", va="center", color="gray", fontsize=10)
-                    
-                    # Loop over data dimensions and create text annotations.
-                    for i in range(self.num_qubits):
-                        for j in range(params_shape):
-                            text = ax_a.text(j, i+0.2, f'{grads_actor[i, j]:.3f}',
-                                        ha="center", va="center", color="white", fontsize=10)
-
-                    for i in range(self.num_layers):
-                        ax_a.vlines(x=(i+1)*(self.num_params+2)-0.5, ymin=-0.5, ymax=self.num_qubits-0.5, color='r', linewidth=3, linestyle='-')
-
-                    ax_a.set_title(f"Weights (gray) and gradients (white) at iteration {iteration}")
-
-                    fig.tight_layout(pad=2.0)
-                    cbar_a = ax_a.figure.colorbar(im_a)
-                    cbar_a.set_label('Absolute gradient value')
-
-                    im_a.set_clim(0, 1)
-                    plt.savefig(f'gradient_matrix__actor_{iteration}.png', dpi=600)
-                    fig.clf()
-            elif self.mode == 'classical':
-                if self.t % self.weight_logging_interval == 0:
-
-                    models = [['actor', self.actor_network]]
-
-                    for type in models:
-                        name = type[0]
-                        model = type[1]
-                        for i in range(len(model._modules)):
-                            if hasattr(model._modules[str(i)], 'weight'): 
-                                self.writer.add_histogram(f'weights/weights_{name}_layer_{i}' , np.reshape(model._modules[str(i)].weight.data, -1), self.t)
-                                self.writer.add_histogram(f'weights/bias_{name}_layer_{i}' , np.reshape(model._modules[str(i)].bias.data, -1), self.t)
-
-                                if self.t >= 1:
-                                    self.writer.add_histogram(f'grads/grads_weights_{name}_layer_{i}' , np.reshape(model._modules[str(i)].weight.grad, -1), self.t)
-                                    self.writer.add_histogram(f'grads/grads_bias_{name}_layer_{i}' , np.reshape(model._modules[str(i)].bias.grad, -1), self.t)

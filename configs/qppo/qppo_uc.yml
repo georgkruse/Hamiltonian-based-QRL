@@ -63,11 +63,8 @@ algorithm_config:
   vqc_type:                       [vqc_generator, 5]   # select vqc_generator or other circuit generator function + number of qubits
   use_hadamard:                   True                  # Create equal superposition in the beginning
   block_sequence:                 enc                   # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
-  encoding_type:                  graph_encoding        # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
-  graph_encoding_type:            #eqc                  # if encoding_type=graph_encoding, than select [eqc, neqc, half-neqc, linear-eqc, ...]
-    - grid_search
-    - string
-    - [s-ppgl, m-ppgl, h-ppgl, m-ppgl-linear, s-ppgl-linear, angular-hwe]
+  encoding_type:                  angular_classical        # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
+  graph_encoding_type:            None                  # if encoding_type=graph_encoding, than select [eqc, neqc, half-neqc, linear-eqc, ...]
   use_single_vqc:                 False
   use_input_scaling_actor:        True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
   use_input_scaling_critic:       True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
