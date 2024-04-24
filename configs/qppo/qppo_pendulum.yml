@@ -1,31 +1,27 @@
 type:                             QRL                   # choose a type: RL, GA, Hypernetwork (DEPRECATED)
-alg:                              QPG                   # name of the algorithm
+alg:                              QPPO                  # name of the algorithm
 seed:                             42                    # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
 constant_seed:                    False                 # setting the same seed accross all runs
 checkpoint_at_end:                False                 # create checkpoint at the end of training
 checkpoint_freq:                  1000                  # set checkpoint frequency, depends on training iterations
-ray_local_mode:                   False                 # set local_mode of ray to True for debugging
-ray_logging_path:                 logs/mvc_dataset_XX_Z/5nodes        # logging directory
-total_num_cpus:                   12                    # total number of cpus
+ray_local_mode:                   True                  # set local_mode of ray to True for debugging
+ray_logging_path:                 logs/qppo/cont        # logging directory
+total_num_cpus:                   4                     # total number of cpus
 total_num_gpus:                   0                     # total number of gpus
-ray_num_trial_samples:            3                     # number of hyperparameter combinations (trials) to run (works differently for grid_search)
-training_iterations:              250                   # number of training iterations
+ray_num_trial_samples:            1                     # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:              750                   # number of training iterations
 run_sections:                                           # specifiy the code you want to run
                                 - qrl_training
                                 # - plotting
                                 # - landscape_plotting
-                                # - algorithm_benchmarking
+                                # - algorithm_training
                                 # - variance_calculation
-
+                                   
 ###########################################################################
 env_type:                     gym_game
-env:                          MVCSEQUENTIALDATASET
+env:                          Pendulum-v1
 env_config:
-  nodes:                      5
-  graph:                      [[[0, 1], [0, 2], [0, 3], [1, 3], [1, 4], [3, 4]],[[0, 1], [0, 2], [1, 3], [1, 4], [2, 3], [3, 4]],[[0, 1], [0, 2], [1, 3], [2, 3], [2, 4], [3, 4]],[[0, 1], [0, 2], [0, 3], [0, 4], [1, 4], [2, 4]],[[0, 1], [0, 2], [0, 3], [0, 4], [2, 4], [3, 4]]]
-  P:                          8
-  use_linear_terms:           True
-###########################################################################
+  mode:                       classical
 
 ###########################################################################
 algorithm_config:                                       # config for QRL training
@@ -37,9 +33,15 @@ algorithm_config:                                       # config for QRL trainin
   num_cpus_per_worker:            2                     # number of cpus for each worker
   framework:                      torch                 # ray framework [torch, tensorflow]
   ###########################################################################
-  lr:                             0.025                 # select lr for nn, variational params and input scaling params
+  lr:                             0.01             # select lr for nn, variational params and input scaling params
+    # - grid_search
+    # - float
+    # - [0.05, 0.025, 0.01]
   lr_output_scaling:              0.1                   # select lr for output scaling params
-  num_layers:                     5                    # select number of layers of vqc (layer nn defined below)
+  num_layers:                     5                     # select number of layers of vqc (layer nn defined below)
+    # - grid_search
+    # - int
+    # - [3, 5, 7]
   ###########################################################################
   mode:                           quantum               # select mode [classical, quantum, hybrid]
   interface:                      torch                 # select pennylane interface, default: torch
@@ -49,28 +51,49 @@ algorithm_config:                                       # config for QRL trainin
   ###########################################################################
   vqc_type:                       [vqc_generator, 5]    # select vqc_generator or other circuit generator function + number of qubits
   use_hadamard:                   True                  # Create equal superposition in the beginning
-  block_sequence:                 enc                   # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
+  block_sequence:                 enc_var_ent                   # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
     # - grid_search
     # - string
     # - [enc, enc_var_ent]
   encoding_type:                  graph_encoding        # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
-  graph_encoding_type:            #angular-hwe          # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
-    - grid_search
-    - string
-    - [s-ppgl, m-ppgl, h-ppgl, s-ppgl-linear, m-ppgl-linear, angular-hwe]
+  graph_encoding_type:            s-ppgl              # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
+    # - grid_search
+    # - string
+    # - [s-ppgl, h-ppgl, m-ppgl] #, s-ppgl-linear, m-ppgl-linear]
   use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
   init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
+    # - grid_search
+    # - list
+    # - [[1.], [0.1]]
   num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
+  quadratic_gate:                 ZZ                    # ZZ, XX, YY
+  linear_gate:                    RZ                    # RZ, RX, RY
+  annotations_gate:               RX                    # RZ, RX, RY
+  measurement_gate:               PauliZ                # PauliZ, PauliX, PauliY
   variational_type:               RZ_RY                 # select the gate sequence [RZ_RY, RY_RZ]
   num_variational_params:         2                     # select the number of params, so e.g. 2 for RZ_RY
-  init_variational_params:        0.1                   # select initialization of the variational parameters
-  init_variational_params_mode:   plus-zero-uniform     # plus-zero-uniform, plus-plus-normal, plus-zero-normal
+  init_variational_params:        1.0                   # select initialization of the variational parameters
+  init_variational_params_mode:   constant              # plus-zero-uniform, plus-plus-normal, plus-zero-normal
   entangling_type:                chain                 # type of entanglement [chain, full, ...]
   entangling_gate:                CZ                    # type of entanglement gate [CNOT, CZ, CH, ...]
-  measurement_type_actor:         exp                   # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  measurement_type_actor:         exp                # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
   use_output_scaling_actor:       True                  # use output scaling [True, False]
   init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
-  postprocessing_actor:           1                     # select postprocessing (check the file postprocessing.py)
+    # - grid_search
+    # - list
+    # - [[10.], [20.], [50.], [100.]]
+  postprocessing_actor:           constant                     # select postprocessing (check the file postprocessing.py)
+  measurement_type_critic:        exp0
+  use_output_scaling_critic:      True                  # use output scaling [True, False]
+    # - grid_search
+    # - string
+    # - [True, False]
+  init_output_scaling_critic:     [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
+  postprocessing_critic:          default               # select postprocessing (check the file postprocessing.py)
+  
+  output_scaling_schedule:         False
+  use_temperature:                 True
+  temperature_schedule:            [[0, 25_000], [1.0, 0.049]]   # number of increment steps, total steps
   ###########################################################################
   noise:                                                # use noise during training
     coherent:                     [False, 0.]           # bool + float for magnitude of used coherent noise
@@ -82,7 +105,7 @@ algorithm_config:                                       # config for QRL trainin
   activation_function:            relu                  # activation function of classical NN
   weight_logging_interval:        5000                  # weight logging + plotting interval (DEPRECATED)
   weight_plotting:                False                 # weight logging + plotting (DEPRECATED)
-  ###########################################################################
+###########################################################################
   # More ray params
   explore:                        True
     # - grid_search
@@ -97,7 +120,12 @@ evaluation:
   ###########################################################################
   plotting:
     mode:                         custom
-    path:                         logs/qppo/uc/02_08/2024-02-09--17-32-20_QRL_QPPO
+    y_axis:                       approximation_ratio 
+    path:                         logs/rodrigo/10/2024-03-26--09-54-51_QRL_QPG
+    # path:                         logs/maxcut/dynamic5/2024-03-20--14-13-46_QRL_QDQN
+    # path:                         logs/uc/paper/10units/2024-03-20--14-23-01_QRL_QPG
+    # path:                         logs/tsp/paper/5nodes/2024-03-20--08-13-49_QRL_QPG
+
   ###########################################################################
   landscape_plotting:
     mode:                         qrl

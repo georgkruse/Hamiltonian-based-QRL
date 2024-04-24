@@ -18,7 +18,7 @@ run_sections:                                           # specifiy the code you 
                                 # - variance_calculation
 
 ###########################################################################
-env:                              MAXCUTWEIGHTEDDYNAMIC                        # Game config               
+env:                          weightedMaxCut                      # Game config               
 env_config:
   nodes:                      5
   mode:                       dynamic

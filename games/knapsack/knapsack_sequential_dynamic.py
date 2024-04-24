@@ -3,8 +3,8 @@ from gymnasium.spaces import Box, Dict, Discrete
 from collections import OrderedDict
 from pyqubo import Binary
 import numpy as np
-from openqaoa.problems import FromDocplex2IsingModel
-from docplex.mp.model import Model
+# from openqaoa.problems import FromDocplex2IsingModel
+# from docplex.mp.model import Model
 import math
 
 class KnapsackSequentialDynamic(gym.Env):

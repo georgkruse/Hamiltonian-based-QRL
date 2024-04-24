@@ -10,7 +10,7 @@ from itertools import combinations
 
 
 
-class MAXCUTWEIGHTEDDYNAMIC(gym.Env):
+class WeightedMaxCut(gym.Env):
     def __init__(self,env_config):
         self.config = env_config
         self.nodes = self.config['nodes']

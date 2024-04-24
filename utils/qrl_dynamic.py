@@ -1,6 +1,6 @@
 import numpy as np
 from ray.rllib.policy.policy import Policy
-from games.knapsack_wrapper import KNAPSACKSEQUENTIALDYNAMICVALIDATIONWRAPPER
+from games.knapsack.knapsack_sequential_dynamic_validation import KnapsackSequentialDynamicValidation
 import yaml
 import numpy as np
 import os

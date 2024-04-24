@@ -19,9 +19,9 @@ from utils.test_pipeline import run_test_pipeline
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="This is the runfile for the open source baseline repo.")
-    parser.add_argument("--alg", default= "configs/qpg/qpg_uc_gk.yml", 
+    parser.add_argument("--alg", default= "configs/qppo/qppo_pendulum.yml", 
                         metavar="FILE", help="path to alg config file", type=str)
-    parser.add_argument("--test", default='0', type=str)
+    parser.add_argument("--test", default='None', type=str)
     args = parser.parse_args()
     
     # Run test
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         ray.init(local_mode=config.ray_local_mode,
                 num_cpus=config.total_num_cpus,
                 num_gpus=config.total_num_gpus,
-                _temp_dir=os.path.dirname(os.path.dirname(os.getcwd())) + '/' + 'ray_logs',
+                _temp_dir=os.path.dirname(os.getcwd()) + '/' + 'ray_logs',
                 include_dashboard=False
                 )
         
