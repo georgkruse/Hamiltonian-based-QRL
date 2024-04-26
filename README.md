@@ -11,7 +11,7 @@ To replicate the results from the publications, please refer to the config files
 To create the appropriate conda environment run (for more info refer to [conda cheat sheet](https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf))
 
 ```
-conda env create --file qrl.yml
+conda env create --file environment.yml
 ```
 
 Most experiments can be carried out by simply executing the main.py with the --path flag set to the path of your config file. Examplary config files can be found in the configs folder.
@@ -175,8 +175,6 @@ evaluation:
   
 ```
 
-Every config file consists
-
 # [Examples]()
 
 Examples as well as more documentation will be added upon request!
@@ -186,7 +184,18 @@ Examples as well as more documentation will be added upon request!
 In this repository additional implementations of e.g. Q-PPO as well as well as OpenAI gym wrappers can be found, which were mainly used in the paper. [Variational Quantum Circuit Design for Quantum Reinforcement Learning on Continuous Environments](https://www.scitepress.org/PublicationsDetail.aspx?ID=gnvuXCuulvU=&t=1) which can also be found on [arxiv](https://arxiv.org/abs/2312.13798).
 
 ```
-Kruse, G.; Drăgan, T.; Wille, R. and Lorenz, J. (2024). Variational Quantum Circuit Design for Quantum Reinforcement Learning on Continuous Environments. In Proceedings of the 16th International Conference on Agents and Artificial Intelligence - Volume 3: ICAART; ISBN 978-989-758-680-4; ISSN 2184-433X, SciTePress, pages 393-400. DOI: 10.5220/0012353100003636
+@conference{icaart24,
+author={Georg Kruse. and Theodora{-}Augustina Drăgan. and Robert Wille. and Jeanette Miriam Lorenz.},
+title={Variational Quantum Circuit Design for Quantum Reinforcement Learning on Continuous Environments},
+booktitle={Proceedings of the 16th International Conference on Agents and Artificial Intelligence - Volume 3: ICAART},
+year={2024},
+pages={393-400},
+publisher={SciTePress},
+organization={INSTICC},
+doi={10.5220/0012353100003636},
+isbn={978-989-758-680-4},
+issn={2184-433X},
+}
 ```
 
 
