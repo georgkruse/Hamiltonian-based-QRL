@@ -23,7 +23,7 @@ def vqc_generator(weights, theta, config, type, activations, H):
             entangling_block(config, type)
             variational_block(config, weights, layer, type)
 
-    elif ((config['block_sequence'] == 'enc_var_ent') or (config['graph_encoding_type'] in ['angular-hwe', 'hamiltonian-hwe'])):
+    elif ((config['block_sequence'] == 'enc_var_ent') or (config['graph_encoding_type'] in ['angular-hea', 'hamiltonian-hea'])):
         for layer in range(config['num_layers']):
             encoding_block(config, theta, weights, layer, type)
             variational_block(config, weights, layer, type)

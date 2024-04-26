@@ -50,9 +50,9 @@ algorithm_config:                                       # config for QRL trainin
   ###########################################################################
   vqc_type:                       [vqc_generator, 5]    # select vqc_generator or other circuit generator function + number of qubits
   use_hadamard:                   True                  # Create equal superposition in the beginning
-  block_sequence:                 enc                   # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
-  encoding_type:                  graph_encoding     # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
-  graph_encoding_type:            s-ppgl                  # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
+  block_sequence:                 enc                   # select the block sequence, enc_var_ent == classical hea ansatz, graph_encoding only needs enc
+  encoding_type:                  graph_encoding        # data encoding type [angular_classical (RY_RZ), arctan_sigmoid, graph_encoding ... ]
+  graph_encoding_type:            sge-sgv               # if encoding_type=graph_encoding, than select [sge-sgv, mge-sgv, mge-mgv, hamiltonian-hea, angular-hea, angular, ...]
   use_input_scaling_actor:        True                  # use input scaling for actor [True, False] 
   init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
   use_input_scaling_critic:       True                  # use input scaling for critic [True, False] 

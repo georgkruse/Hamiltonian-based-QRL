@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch.nn as nn
 from torch.nn import functional as F
-from torch.utils.tensorboard import SummaryWriter
 from ray.rllib.utils.annotations import override
 from ray.rllib.algorithms.pg.pg_torch_policy import PGTorchPolicy
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
@@ -229,31 +228,31 @@ class QuantumPGModel(TorchModelV2, nn.Module, ABC):
 
             if self.config['encoding_type'] == 'graph_encoding':
                 
-                if self.config['graph_encoding_type'] in ['s-ppgl', 's-ppgl-linear', 's-ppgl-quadratic']:
+                if self.config['graph_encoding_type'] in ['sge-sgv', 'sge-sgv-linear', 'sge-sgv-quadratic']:
                     size_vqc = 1
                     size_input_scaling = 1
-                elif self.config['graph_encoding_type'] == 'm-ppgl':
+                elif self.config['graph_encoding_type'] == 'mge-mgv':
                     size_vqc = self.num_qubits
                     size_input_scaling = sum(range(self.num_qubits+1))+self.num_qubits
-                elif self.config['graph_encoding_type'] == 'm-ppgl-linear':
+                elif self.config['graph_encoding_type'] == 'mge-mgv-linear':
                     size_vqc = self.num_qubits
                     size_input_scaling = self.num_qubits
-                elif self.config['graph_encoding_type'] == 'm-ppgl-quadratic':
+                elif self.config['graph_encoding_type'] == 'mge-mgv-quadratic':
                     size_vqc = self.num_qubits
                     size_input_scaling = sum(range(self.num_qubits+1))
-                elif self.config['graph_encoding_type'] == 'h-ppgl':
+                elif self.config['graph_encoding_type'] == 'mge-sgv':
                     size_vqc = 1
                     size_input_scaling = sum(range(self.num_qubits+1))+self.num_qubits
-                elif self.config['graph_encoding_type'] == 'h-ppgl-linear':
+                elif self.config['graph_encoding_type'] == 'mge-sgv-linear':
                     size_vqc = 1
                     size_input_scaling = self.num_qubits + 1
-                elif self.config['graph_encoding_type'] == 'h-ppgl-quadratic':
+                elif self.config['graph_encoding_type'] == 'mge-sgv-quadratic':
                     size_vqc = 1
                     size_input_scaling = sum(range(self.num_qubits+1)) + 1
-                elif self.config['graph_encoding_type'] in ['angular', 'angular-hwe']:
+                elif self.config['graph_encoding_type'] in ['angular', 'angular-hea']:
                     size_vqc = self.num_qubits*self.num_params
                     size_input_scaling = self.num_qubits*self.config['num_scaling_params']
-                elif self.config['graph_encoding_type'] == 'hamiltonian-hwe':
+                elif self.config['graph_encoding_type'] == 'hamiltonian-hea':
                     size_vqc = self.num_qubits*self.num_params
                     size_input_scaling = 0
                 if self.config['block_sequence'] in ['enc_var_ent', 'enc_var', 'enc_ent_var']:
@@ -356,14 +355,13 @@ class QuantumPGModel(TorchModelV2, nn.Module, ABC):
                         prob.append(self.qnode_actor(theta=tmp_state, weights=self._parameters, config=self.config, type='actor', activations=None, H=None))
 
                     prob = torch.stack(prob)
-                elif self.config['measurement_type_actor'] == 'skolik':
+                elif self.config['measurement_type_actor'] == 'edge':
                     prob = []
                     for i in range(state['quadratic_0'].shape[1]):
                         if not state['quadratic_0'][0,0,0].to(torch.int).item() + state['quadratic_0'][0,0,1].to(torch.int).item() == 0:
-                            self.config['skolik_measurement'] = state['quadratic_0'][0,i,:2]
+                            self.config['edge_measurement'] = state['quadratic_0'][0,i,:2]
                         else:
-                            self.config['skolik_measurement'] = [torch.tensor(0.), torch.tensor(1.)]
-                        # self.config['skolik_measurement'] = state['quadratic_0'][0,i,:2]
+                            self.config['edge_measurement'] = [torch.tensor(0.), torch.tensor(1.)]
                         prob.append(self.qnode_actor(theta=state, weights=self._parameters, config=self.config, type='actor', activations=None, H=None))
                     prob = torch.stack(prob).T
                     prob = torch.reshape(prob, (-1, state['quadratic_0'].shape[1]))

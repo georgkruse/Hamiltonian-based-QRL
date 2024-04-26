@@ -10,8 +10,6 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 import numpy as np
-import matplotlib.pyplot as plt
-from torch.utils.tensorboard import SummaryWriter
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.numpy import convert_to_numpy
 from ray.rllib.algorithms.ppo import PPO
@@ -359,34 +357,34 @@ class QuantumPPOModel(TorchModelV2, nn.Module, ABC):
 
             if self.config['encoding_type'] == 'graph_encoding':
 
-                if self.config['graph_encoding_type'] in ['s-ppgl', 's-ppgl-linear', 's-ppgl-quadratic']:
+                if self.config['graph_encoding_type'] in ['sge-sgv', 'sge-sgv-linear', 'sge-sgv-quadratic']:
                     size_vqc = 1
                     size_input_scaling = 1
-                elif self.config['graph_encoding_type'] == 'm-ppgl':
+                elif self.config['graph_encoding_type'] == 'mge-mgv':
                     size_vqc = self.num_qubits
                     size_input_scaling = sum(range(self.num_qubits+1))+self.num_qubits
-                elif self.config['graph_encoding_type'] == 'm-ppgl-linear':
+                elif self.config['graph_encoding_type'] == 'mge-mgv-linear':
                     size_vqc = self.num_qubits
                     size_input_scaling = self.num_qubits
-                elif self.config['graph_encoding_type'] == 'm-ppgl-quadratic':
+                elif self.config['graph_encoding_type'] == 'mge-mgv-quadratic':
                     size_vqc = self.num_qubits
                     size_input_scaling = sum(range(self.num_qubits+1))
-                elif self.config['graph_encoding_type'] == 'h-ppgl':
+                elif self.config['graph_encoding_type'] == 'mge-sgv':
                     size_vqc = 1
                     size_input_scaling = sum(range(self.num_qubits+1))+self.num_qubits
-                elif self.config['graph_encoding_type'] == 'h-ppgl-linear':
+                elif self.config['graph_encoding_type'] == 'mge-sgv-linear':
                     size_vqc = 1
                     size_input_scaling = self.num_qubits + 1
-                elif self.config['graph_encoding_type'] == 'h-ppgl-quadratic':
+                elif self.config['graph_encoding_type'] == 'mge-sgv-quadratic':
                     size_vqc = 1
                     size_input_scaling = sum(range(self.num_qubits+1)) + 1
                 elif self.config['graph_encoding_type'] =='angular':
                     size_vqc = 0
                     size_input_scaling = self.num_qubits*self.config['num_scaling_params']
-                elif self.config['graph_encoding_type'] =='angular-hwe':
+                elif self.config['graph_encoding_type'] =='angular-hea':
                     size_vqc = self.num_qubits*self.num_params
                     size_input_scaling = self.num_qubits*self.config['num_scaling_params']
-                elif self.config['graph_encoding_type'] == 'hamiltonian-hwe':
+                elif self.config['graph_encoding_type'] == 'hamiltonian-hea':
                     size_vqc = self.num_qubits*self.num_params
                     self.use_input_scaling_actor = False
                     self.use_input_scaling_critic = False

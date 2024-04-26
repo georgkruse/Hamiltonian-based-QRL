@@ -36,7 +36,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
 
         x, z = 0, 0
         for h_num in range(1):
-            if config['graph_encoding_type'] == 's-ppgl':
+            if config['graph_encoding_type'] == 'sge-sgv':
                 for idx in range(theta[f'quadratic_{h_num}'].shape[1]):
                     quadratic_gate(theta[f'quadratic_{h_num}'][:,idx,2]*params_input[x], wires=[indexing_quadratic[0,idx,0],indexing_quadratic[0,idx,1]])
                 
@@ -53,7 +53,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                 z += 1
             
 
-            elif config['graph_encoding_type'] == 's-ppgl-linear':
+            elif config['graph_encoding_type'] == 'sge-sgv-linear':
                 for idx in range(theta[f'linear_{h_num}'].shape[1]):
                     linear_gate(theta[f'linear_{h_num}'][:,idx,1]*params_input[x], wires=indexing_linear[0,idx])
                 x += 1
@@ -67,7 +67,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                 z += 1
 
 
-            elif config['graph_encoding_type'] == 's-ppgl-quadratic':
+            elif config['graph_encoding_type'] == 'sge-sgv-quadratic':
                 for idx in range(theta[f'quadratic_{h_num}'].shape[1]):
                     quadratic_gate(theta[f'quadratic_{h_num}'][:,idx,2]*params_input[x], wires=[indexing_quadratic[0,idx,0],indexing_quadratic[0,idx,1]])
                 x += 1
@@ -77,7 +77,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                 z += 1
 
 
-            elif config['graph_encoding_type'] == 'm-ppgl':
+            elif config['graph_encoding_type'] == 'mge-mgv':
                 for idx in range(theta[f'quadratic_{h_num}'].shape[1]):
                     quadratic_gate(theta[f'quadratic_{h_num}'][:,idx,2]*params_input[x], wires=[indexing_quadratic[0,idx,0],indexing_quadratic[0,idx,1]])
                     x += 1
@@ -95,7 +95,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                         annotations_gate(params_var[z], wires=indexing_linear[0,idx])
                         z += 1
 
-            elif config['graph_encoding_type'] == 'm-ppgl-linear':  
+            elif config['graph_encoding_type'] == 'mge-mgv-linear':  
                 for idx in range(theta[f'linear_{h_num}'].shape[1]):
                     linear_gate(theta[f'linear_{h_num}'][:,idx,1]*params_input[x], wires=indexing_linear[0,idx])
                     x += 1
@@ -110,7 +110,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                         z += 1
 
 
-            elif config['graph_encoding_type'] == 'm-ppgl-quadratic':
+            elif config['graph_encoding_type'] == 'mge-mgv-quadratic':
                 for idx in range(theta[f'quadratic_{h_num}'].shape[1]):
                     quadratic_gate(theta[f'quadratic_{h_num}'][:,idx,2]*params_input[x], wires=[indexing_quadratic[0,idx,0],indexing_quadratic[0,idx,1]])
                     x += 1
@@ -125,7 +125,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                         z += 1
 
 
-            elif config['graph_encoding_type'] == 'h-ppgl':
+            elif config['graph_encoding_type'] == 'mge-sgv':
                 for idx in range(theta[f'quadratic_{h_num}'].shape[1]):
                     quadratic_gate(theta[f'quadratic_{h_num}'][:,idx,2]*params_input[x], wires=[indexing_quadratic[0,idx,0],indexing_quadratic[0,idx,1]])
                     x += 1
@@ -142,7 +142,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                         annotations_gate(params_var[z], wires=indexing_linear[0,idx])
                 z += 1
 
-            elif config['graph_encoding_type'] == 'hamiltonian-hwe':
+            elif config['graph_encoding_type'] == 'hamiltonian-hea':
                 for idx in range(theta[f'quadratic_{h_num}'].shape[1]):
                     quadratic_gate(theta[f'quadratic_{h_num}'][:,idx,2], wires=[indexing_quadratic[0,idx,0],indexing_quadratic[0,idx,1]])
                 
@@ -150,7 +150,7 @@ def graph_encoding_block(config, theta, weights, layer, type=None):
                     linear_gate(theta[f'linear_{h_num}'][:,idx,1], wires=indexing_linear[0,idx])
 
 
-            elif config['graph_encoding_type'] in ['angular', 'angular-hwe']:
+            elif config['graph_encoding_type'] in ['angular', 'angular-hea']:
 
                 for idx in range(theta[f'linear_{h_num}'].shape[1]):
                     

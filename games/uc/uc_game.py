@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pyqubo import Binary
 import pennylane as qml
-from copy import deepcopy
 from collections import OrderedDict
 import gymnasium as gym
 from gymnasium.spaces import MultiDiscrete, Box, Dict, Discrete

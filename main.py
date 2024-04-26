@@ -19,7 +19,7 @@ from utils.test_pipeline import run_test_pipeline
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="This is the runfile for the open source baseline repo.")
-    parser.add_argument("--alg", default= "configs/qppo/qppo_uc.yml", 
+    parser.add_argument("--path", default= "configs/qpg/qpg_maxcut.yml", 
                         metavar="FILE", help="path to alg config file", type=str)
     parser.add_argument("--test", default='None', type=str)
     args = parser.parse_args()
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     if args.test == '0':
         run_test_pipeline()
     # Load the config file
-    with open(args.alg) as f:
+    with open(args.path) as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
     config = namedtuple("ObjectName", data.keys())(*data.values())
     path = None 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
         # Copy the config files into the ray-run folder
         os.makedirs(os.path.dirname(path + '/'), exist_ok=True)
-        shutil.copy(args.alg, path + '/alg_config.yml')
+        shutil.copy(args.path, path + '/alg_config.yml')
         
         def trial_name_creator(trial):
             return trial.__str__() + '_' + trial.experiment_tag + ','

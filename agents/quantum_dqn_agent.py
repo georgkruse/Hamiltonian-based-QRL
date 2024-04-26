@@ -1,6 +1,5 @@
 from abc import ABC
 import numpy as np
-from torch.utils.tensorboard import SummaryWriter
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from gymnasium.spaces import Box, Discrete, MultiBinary, MultiDiscrete, Dict
 import pennylane as qml
@@ -385,31 +384,31 @@ class QuantumDQN_Model(TorchModelV2,nn.Module,ABC):
 
             if self.config['encoding_type'] == 'graph_encoding':
             
-                if self.config['graph_encoding_type'] in ['s-ppgl', 's-ppgl-linear', 's-ppgl-quadratic']:
+                if self.config['graph_encoding_type'] in ['sge-sgv', 'sge-sgv-linear', 'sge-sgv-quadratic']:
                     size_vqc = 1
                     size_input_scaling = 1
-                elif self.config['graph_encoding_type'] == 'm-ppgl':
+                elif self.config['graph_encoding_type'] == 'mge-mgv':
                     size_vqc = self.num_qubits
                     size_input_scaling = sum(range(self.num_qubits+1))+self.num_qubits
-                elif self.config['graph_encoding_type'] == 'm-ppgl-linear':
+                elif self.config['graph_encoding_type'] == 'mge-mgv-linear':
                     size_vqc = self.num_qubits
                     size_input_scaling = self.num_qubits
-                elif self.config['graph_encoding_type'] == 'm-ppgl-quadratic':
+                elif self.config['graph_encoding_type'] == 'mge-mgv-quadratic':
                     size_vqc = self.num_qubits
                     size_input_scaling = sum(range(self.num_qubits+1))
-                elif self.config['graph_encoding_type'] == 'h-ppgl':
+                elif self.config['graph_encoding_type'] == 'mge-sgv':
                     size_vqc = 1
                     size_input_scaling = sum(range(self.num_qubits+1))+self.num_qubits
-                elif self.config['graph_encoding_type'] == 'h-ppgl-linear':
+                elif self.config['graph_encoding_type'] == 'mge-sgv-linear':
                     size_vqc = 1
                     size_input_scaling = self.num_qubits + 1
-                elif self.config['graph_encoding_type'] == 'h-ppgl-quadratic':
+                elif self.config['graph_encoding_type'] == 'mge-sgv-quadratic':
                     size_vqc = 1
                     size_input_scaling = sum(range(self.num_qubits+1)) + 1
-                elif self.config['graph_encoding_type'] in ['angular', 'angular-hwe']:
+                elif self.config['graph_encoding_type'] in ['angular', 'angular-hea']:
                     size_vqc = self.num_qubits*self.num_params
                     size_input_scaling = self.num_qubits*self.config['num_scaling_params']
-                elif self.config['graph_encoding_type'] == 'hamiltonian-hwe':
+                elif self.config['graph_encoding_type'] == 'hamiltonian-hea':
                     size_vqc = self.num_qubits*self.num_params
                     size_input_scaling = 0
                 if self.config['block_sequence'] in ['enc_var_ent', 'enc_var', 'enc_ent_var']:
@@ -490,13 +489,13 @@ class QuantumDQN_Model(TorchModelV2,nn.Module,ABC):
                 if not isinstance(self.obs_space, gym.spaces.Dict): 
                     state = torch.reshape(state, (-1, self.obs_space.shape[0]))
 
-            if self.config['measurement_type_actor'] == 'skolik':
+            if self.config['measurement_type_actor'] == 'edge':
                 prob = []
                 for i in range(state['quadratic_0'].shape[1]):
                     if not state['quadratic_0'][0,0,0].to(torch.int).item() + state['quadratic_0'][0,0,1].to(torch.int).item() == 0:
-                        self.config['skolik_measurement'] = state['quadratic_0'][0,i,:2]
+                        self.config['edge_measurement'] = state['quadratic_0'][0,i,:2]
                     else:
-                        self.config['skolik_measurement'] = [torch.tensor(0.), torch.tensor(1.)]
+                        self.config['edge_measurement'] = [torch.tensor(0.), torch.tensor(1.)]
 
                     prob.append(self.qnode_actor(theta=state, weights=self._parameters, config=self.config, type='actor', activations=None, H=None))
 

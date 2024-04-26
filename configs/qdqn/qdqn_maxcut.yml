@@ -22,7 +22,7 @@ env_config:
   reward_mode:                    normal                # either normal or ratio
   annotation_value:               0                     # annotation value (either 0 or 2pi)
   constant:                       False                 # set the training graph constant for testing
-  action_space:                   discrete_edges        # either 'discrete_nodes' or 'discrete_edges' measurements (measurement needs to be set to 'skolik' for discrete_edges)       
+  action_space:                   discrete_nodes        # either 'discrete_nodes' or 'discrete_edges' measurements (measurement needs to be set to 'edge' for discrete_edges)       
   reward_at_end:                  False                 # return reward only at end if set True
   callback:                       MaxCut_Callback       # callback to log additional information during training     
   path:                           /home/users/kruse/Hamiltonian-based-QRL # path to dataset needs to be specified (run pwd / current directory)
@@ -68,10 +68,10 @@ algorithm_config:                                       # config for QRL trainin
   ###########################################################################
   vqc_type:                       [vqc_generator, 5]    # select vqc_generator or other circuit generator function + number of qubits
   use_hadamard:                   True                  # Create equal superposition in the beginning
-  block_sequence:                 enc_var_ent           # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
+  block_sequence:                 enc_var_ent           # select the block sequence, enc_var_ent == classical hea ansatz, graph_encoding only needs enc
   encoding_type:                  graph_encoding        # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
-  graph_encoding_type:            s-ppgl                # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
-  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  graph_encoding_type:            sge-sgv               # if encoding_type=graph_encoding, than select [sge-sgv, mge-sgv, mge-mgv, hamiltonian-hea, angular-hea, angular, ...]
+  use_input_scaling:              True                  # use input scaling [True, False]
   init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
   num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
   quadratic_gate:                 ZZ                    # ZZ, XX, YY
@@ -84,7 +84,7 @@ algorithm_config:                                       # config for QRL trainin
   init_variational_params_mode:   constant              # plus-zero-uniform, plus-plus-normal, plus-zero-normal
   entangling_type:                chain                 # type of entanglement [chain, full, ...]
   entangling_gate:                CZ                    # type of entanglement gate [CNOT, CZ, CH, ...]
-  measurement_type_actor:         skolik                # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  measurement_type_actor:         exp                # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
   use_output_scaling_actor:       True                  # use output scaling [True, False]
   problem_scaling:                False
   init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]

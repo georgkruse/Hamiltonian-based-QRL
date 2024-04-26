@@ -63,8 +63,8 @@ algorithm_config:                                       # config for QRL trainin
   use_hadamard:                   True                  # Create equal superposition in the beginning
   block_sequence:                 enc_var_ent           # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
   encoding_type:                  angular_classical     # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
-  graph_encoding_type:            s-ppgl                # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
-  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  graph_encoding_type:            None                  # if encoding_type=graph_encoding, than select [sge-sgv, mge-sgv, mge-mgv, hamiltonian-hea, angular-hea, angular, ...]
+  use_input_scaling:              True                  # use input scaling [True, False] 
   init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
   num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
   quadratic_gate:                 ZZ                    # ZZ, XX, YY

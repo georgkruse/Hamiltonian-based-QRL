@@ -40,8 +40,8 @@ def measurement(config, type=None, H=None):
             return list(np.reshape(measurement, -1))
         elif config['measurement_type_actor'] == 'jerbi':
             return [qml.expval(measurement_gate(0)@measurement_gate(1)@measurement_gate(2)@measurement_gate(3))]
-        elif config['measurement_type_actor'] == 'skolik':
-            return  [qml.expval(measurement_gate(config['skolik_measurement'][0].to(torch.int).item())@measurement_gate(config['skolik_measurement'][1].to(torch.int).item()))] #, qml.expval(measurement_gate(2)@measurement_gate(3))]
+        elif config['measurement_type_actor'] == 'edge':
+            return  [qml.expval(measurement_gate(config['edge_measurement'][0].to(torch.int).item())@measurement_gate(config['edge_measurement'][1].to(torch.int).item()))] 
         else:
             print(f'Measurement type for {type} not implemented.')
         

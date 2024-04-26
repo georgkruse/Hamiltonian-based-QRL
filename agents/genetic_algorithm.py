@@ -1,5 +1,4 @@
 from ray import tune 
-import tensorflow as tf 
 import numpy as np 
 import pennylane as qml 
 import torch
