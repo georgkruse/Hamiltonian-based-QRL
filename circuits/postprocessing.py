@@ -50,17 +50,12 @@ def postprocessing(prediction, config, action_space, weights, type):
         return value
     
     elif type == 'actor':
-        if config['postprocessing_actor'] == 0:
-            pred = prediction[:action_space]
 
-        elif config['postprocessing_actor'] == 'standard':
+        if config['postprocessing_actor'] == 'standard':
             if len(prediction.shape) > 1:
                 pred = prediction[:,:action_space]*scaling[:action_space]
             else:
                 pred = prediction[:action_space]*scaling[:action_space]
-
-        elif config['postprocessing_actor'] == 'argmax':
-            pred = prediction
 
         elif config['postprocessing_actor'] == 'plain_probs':
             pred = prediction

@@ -32,14 +32,12 @@ class TSP(gym.Env):
         self.config = env_config
         self.nodes = self.config['nodes']
         self.fully_connected_qubits = list(combinations(list(range(self.nodes)), 2))
-
          
-        with open('/home/users/kruse/quantum-computing/QRL/games/tsp/data/tsp_5_reduced_train.pickle', 'rb') as file:
+        with open(env_config['path'] + '/games/tsp/data/tsp_5_reduced_train.pickle', 'rb') as file:
             self.data = pickle.load(file)
 
         self.data_x = self.data['x_train']
         self.data_y = self.data['y_train']
-
 
         self.state = OrderedDict()
         self.timestep = np.random.randint(low = 0, high = len(self.data_x[0]))
@@ -49,7 +47,6 @@ class TSP(gym.Env):
         self.a = {}
         for node in range(self.nodes):
             self.a[str(node)] = np.pi
-
 
         spaces = {}
         spaces['linear_0'] = Box(-np.inf, np.inf, shape = (self.nodes,2), dtype='float64')
@@ -139,7 +136,7 @@ class TSP(gym.Env):
             state['current_node'] = np.array([0])
 
         self.current_node = state['current_node']
-        if self.config['observation_space'] == 'node_wise':
+        if self.config['annotation_type'] == 'node_wise':
             state['annotations'] = np.stack([[idx, self.state_list[idx]] for idx in range(self.nodes)])
 
         return deepcopy(state), {}
@@ -218,7 +215,7 @@ class TSP(gym.Env):
             next_state['current_node'] = np.array([self.tour[-1]])
 
         self.current_node = next_state['current_node']
-        if self.config['observation_space'] == 'node_wise':
+        if self.config['annotation_type'] == 'node_wise':
             next_state['annotations'] = np.stack([[idx, self.state_list[idx]] for idx in range(self.nodes)])
 
         return deepcopy(next_state), reward, done, False, {}

@@ -5,7 +5,7 @@ from ray.rllib.policy import Policy
 from typing import Dict
 
 
-class PG_MaxCut_Callbacks(DefaultCallbacks):
+class MaxCut_Callback(DefaultCallbacks):
     def __init__(self):
         self.timestep = 0
     
@@ -20,7 +20,7 @@ class PG_MaxCut_Callbacks(DefaultCallbacks):
             **kwargs,
     ):
         
-        self.timestep = worker.env.env.timestep
+        self.timestep = worker.env.timestep
         
     def on_episode_end(
             self,
@@ -32,13 +32,12 @@ class PG_MaxCut_Callbacks(DefaultCallbacks):
             env_index: int,
             **kwargs,
     ):
-        optimal_cost = worker.env.env.optimal_cost(timestep = self.timestep)
+        optimal_cost = worker.env.optimal_cost(timestep = self.timestep)
         approximation_ratio = float(episode.total_reward)/optimal_cost
         episode.custom_metrics["approximation_ratio"] = approximation_ratio
-        print(approximation_ratio)
-        # episode.custom_metrics["episode_reward"] = float(episode.total_reward)
+        # print(approximation_ratio)
 
-class PG_TSP_Callbacks(DefaultCallbacks):
+class TSP_Callback(DefaultCallbacks):
     def __init__(self):
         self.timestep = 0
     
@@ -67,10 +66,7 @@ class PG_TSP_Callbacks(DefaultCallbacks):
     ):
         approximation_ratio = worker.env.ratio
         episode.custom_metrics["approximation_ratio"] = approximation_ratio
-        print(approximation_ratio)
-
-        # episode.custom_metrics["episode_reward"] = float(episode.total_reward)
-
+        # print(approximation_ratio)
 
 class KnapsackCallback(DefaultCallbacks):
     def __init__(self):

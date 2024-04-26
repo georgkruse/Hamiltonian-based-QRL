@@ -1,138 +1,112 @@
-type:                        QRL                   # choose a type: RL, GA, Hypernetwork, ...
-alg:                         QDQN                  # name of the algorithm
-use_ray_alg:                 False                 # use custom algorithm or ray framework
-seed:                        42                   # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+type:                             QRL                   # choose a type: RL, GA, Hypernetwork (DEPRECATED)
+alg:                              QDQN                  # name of the algorithm
+seed:                             42                    # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+constant_seed:                    False                 # setting the same seed accross all runs
+checkpoint_at_end:                True                  # create checkpoint at the end of training
+checkpoint_freq:                  5000                  # set checkpoint frequency, depends on training iterations
+ray_local_mode:                   False                 # set local_mode of ray to True for debugging
+ray_logging_path:                 logs/cartpole/qdqn         # logging directory
+total_num_cpus:                   10                    # total number of cpus
+total_num_gpus:                   0                     # total number of gpus
+ray_num_trial_samples:            1                     # number of training seeds per combination
+training_iterations:              50                    # number of training iterations
+run_sections:                                           # specify the sections ['qrl_training' and 'plotting']
+                                - qrl_training
+                                - plotting
 
-mode:                        training             # select the mode you want to use: 'custom', 'training'
-trainer:                     default
-checkpoint_at_end:           False
-checkpoint_freq:             200
-ray_local_mode:              False                # set local_mode of ray to True for debugging
-load_path:                   some/path/weights    # provide a model weight path if you want to do continue from stopped training
-
-ray_logging_path:            logs/qdqn/cartpole/12_10        # logging directory
-total_num_cpus:              14                   # total number of cpus
-total_num_gpus:              0                    # total number of gpus
-ray_num_trial_samples:       1                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
-training_iterations:         100                  # number of training iterations
-
-
-env_type:                     gym_game
-env:                          CartPole-v1
+############################## Env Config #############################################
+env:                              CartPole-v1           # specifiy env string
 env_config:
-  mode:                       classical
+  mode:                           classical             # select the mode (see also wrapper class)
 
 
-# Additional custom parameters
-# withOUT rescaling of critic 
-algorithm_config:
-  num_gpus:                   0                   # number of gpus for each trial
-  num_rollout_workers:        1                  # number of worker for each trial. By ray default, every worker needs one cpu
-  num_envs_per_worker:        1                   # number of game enviroments for each worker
-  num_gpus_per_worker:        0                   # number of worker for each trial.
-  num_cpus_per_worker:        1                # number of worker for each trial.
-  constant_seed:              False 
-  framework:                  torch
-  ###########################################################################
-  lr:                         0.001
-  # weight_decay: 
-  #   - grid_search
-  #   - float
-  #   - [0, 1.0e-4, 1.0e-5]
-  lr_output_scaling:          0.1
-    # - grid_search
-    # - [0.1, 0.01]  
-  num_layers:                   5            
-    # - grid_search   
-    # - int 
-    # - [9, 12]
-  
-  target_network_update_freq:   1
-
+############################### Alg Config #############################################
+algorithm_config:                                       # config for QRL training
+  target_network_update_freq: 10
   exploration_config:
-    epsilon_timesteps:  5000
+    epsilon_timesteps: 10_000
     final_epsilon: 0.01
-    initial_epsilon: 1
-    type: EpsilonGreedy
+    initial_epsilon: 1.00
+    type: CustomEpsilonGreedy
 
   replay_buffer_config:
-    capacity:   10000
+    capacity: 10000
     replay_sequence_length: 1
     type: MultiAgentReplayBuffer
   
   num_steps_sampled_before_learning_starts: 100
-  
   gamma: 0.99
-
   dueling: False
-
   double_q : False
-
   tau : 1
-
   td_error_loss_fn: mse
-
-  train_batch_size:   32
-  # blocks: 
-  #   - choice 
-  #   - string
-  #   - [[[[0, 1], [2, 3]], [[0, 1], [2], [3]]]]
-  ###########################################################################
-  mode:                       quantum # classical, quantum, hybrid
-    # - grid_search
-    # - string
-    # - [classical, quantum]
-  interface:                  torch
-  diff_method:                adjoint                             
-  backend_name:               lightning.qubit
-  custom_optimizer:           Adam #Adam   
-  ###########################################################################
-  vqc_type:                   [vqc_generator, 4] #qcnn_circuit_pendulum # triple_circuit
-    # - grid_search
-    # - list
-    # - [[vqc_generator, 6], [vqc_double, 6]] #qcnn_circuit_pendulum # vqc_generator # relu_circuit_pendulum 
-  use_hadamard:               False
-  block_sequence:             enc_var_ent
-  encoding_type:              angle_encoding_RX_atan # layerwise_arctan_sigmoid #angular_classical
-    # - grid_search
-    # - string
-    # - [layerwise_arctan, layerwise_sigmoid, layerwise_arctan_sigmoid, layerwise_sigmoid_arctan]
-  use_input_scaling:          True
-  num_scaling_params:         1
-  entangling_type:            chain
-    # - grid_search
-    # - [full, chain]
-  entangling_gate:            CZ
-    # - grid_search
-    # - string
-    # - [CZ, CNOT]
-  variational_type:           RZ_RY
-  num_variational_params:     2
-  measurement_type_actor:     exp_@_exp             # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
-  use_output_scaling_actor:   True
-  init_output_scaling_actor:  [1.]
-  postprocessing_actor:       1
-  ###########################################################################
-  init_params:                3.14
-  init_params_mode:           plus-minus-uniform    # plus-zero-uniform #, plus-plus-normal. plus-zero-normal
-  layerwise_training:         False
-  gradient_clipping:          False
-  use_classical_layer:        False
-  layer_size:                 [16, 16]
-    # - grid_search
-    # - list
-    # - [[8], [16], [32], [64], [8, 8], [16, 16], [32, 32], [64, 64], [8, 16], [8, 32], [8, 64], [16, 32], [16, 64], [32, 64]]
-  activation_function:      relu  
-    # - grid_search
-    # - string
-    # - [relu, leaky_relu, tanh]         
-  weight_logging_interval:    5000
-  weight_plotting:            True
-  ###########################################################################
-  # More ray params
-  dueling: False
+  grad_clip: None
+  action_masking: True
+  train_batch_size: 16
   
-  noise:
-    coherent: [False, 0.]
-    depolarizing: [False, 0.001]
+  _disable_preprocessor_api:      True
+  ###########################################################################
+  reuse_actors:                   True
+  framework:                      torch                 # ray framework [torch, tensorflow]
+  ###########################################################################
+  lr:                             0.025                 # select lr for nn, variational params and input scaling params
+  lr_output_scaling:              0.1                   # select lr for output scaling params
+  num_layers:                     2                     # select number of layers of vqc (layer nn defined below)
+  ###########################################################################
+  mode:                           quantum               # select mode [classical, quantum, hybrid]
+  interface:                      torch                 # select pennylane interface, default: torch
+  diff_method:                    adjoint               # select pennylane diff_method [adjoing, backprop, ...] 
+  backend_name:                   lightning.qubit       # select pennylane backend [lightning.qubit, default.qubit, ...]
+  custom_optimizer:               Adam                  # select the classical optimizer [Adam, RMSprop, LBFGS, ...] 
+  ###########################################################################
+  vqc_type:                       [vqc_generator, 4]    # select vqc_generator or other circuit generator function + number of qubits
+  use_hadamard:                   True                  # Create equal superposition in the beginning
+  block_sequence:                 enc_var_ent           # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
+  encoding_type:                  angular_classical     # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
+  graph_encoding_type:            s-ppgl                # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
+  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
+  init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
+  num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
+  quadratic_gate:                 ZZ                    # ZZ, XX, YY
+  linear_gate:                    RZ                    # RZ, RX, RY
+  annotations_gate:               RX                    # RZ, RX, RY
+  measurement_gate:               PauliX                # PauliZ, PauliX, PauliY
+  variational_type:               RZ_RY                 # select the gate sequence [RZ_RY, RY_RZ]
+  num_variational_params:         2                     # select the number of params, so e.g. 2 for RZ_RY
+  init_variational_params:        1.0                   # select initialization of the variational parameters
+  init_variational_params_mode:   plus-zero-uniform     # plus-zero-uniform, plus-plus-normal, plus-zero-normal
+  entangling_type:                chain                 # type of entanglement [chain, full, ...]
+  entangling_gate:                CZ                    # type of entanglement gate [CNOT, CZ, CH, ...]
+  measurement_type_actor:         exp                   # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  use_output_scaling_actor:       True                  # use output scaling [True, False]
+  init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
+  postprocessing_actor:           standard              # select postprocessing (check the file postprocessing.py)
+  output_scaling_schedule:        False
+  use_temperature:                False
+  temperature_schedule:           [[0, 100_000], [0.5, 0.05]]   # number of increment steps, total steps
+  ###########################################################################
+  noise:                                                # use noise during training
+    coherent:                     [False, 0.]           # bool + float for magnitude of used coherent noise
+    depolarizing:                 [False, 0.001]        # bool + float for magnitude of used depolarizing noise
+  layerwise_training:             False                 # layerwise training (DEPRECATED)
+  gradient_clipping:              False                 # gradient clipping (DEPRECATED)
+  use_classical_layer:            False                 # additional postprocessing (DEPRECATED)
+  layer_size:                     [64, 64]              # classical NN, max 3 layers with in as number of neurons in the according layer
+  activation_function:            relu                  # activation function of classical NN
+  weight_logging_interval:        5000                  # weight logging + plotting interval (DEPRECATED)
+  weight_plotting:                False                 # weight logging + plotting (DEPRECATED)
+###########################################################################
+  # More ray params
+  explore:                        True
+
+
+############################## Eval Config #############################################
+evaluation:
+  set_seed:               True 
+  seed:                   42
+  ###########################################################################
+  plotting:
+    mode:                         auto 
+    y_axis:                       episode_reward_mean 
+    path:                         logs/uc/paper_2/10units/2024-04-08--17-00-08_QRL_QPG
   

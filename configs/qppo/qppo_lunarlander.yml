@@ -1,89 +1,100 @@
-type:                        QRL                   # choose a type: RL, GA, Hypernetwork, ...
-alg:                         QPPO                  # name of the algorithm
-use_ray_alg:                 False                 # use custom algorithm or ray framework
-seed:                        42                   # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
-
-mode:                        training             # select the mode you want to use: 'custom', 'training'
-trainer:                     default
-checkpoint_freq:             50
-checkpoint_at_end:           False
-ray_local_mode:              False                # set local_mode of ray to True for debugging
-load_path:                   some/path/weights    # provide a model weight path if you want to do continue from stopped training
-
-ray_logging_path:            logs/qppo/lunarlander      # logging directory
-total_num_cpus:              150                   # total number of cpus
-total_num_gpus:              0                    # total number of gpus
-ray_num_trial_samples:       3                    # number of hyperparameter combinations (trials) to run (works differently for grid_search)
-training_iterations:         300                  # number of training iterations
-
-env_type:                 gym_game
-env:                      LunarLander-v2
+type:                             QRL                   # choose a type: RL, GA, Hypernetwork (DEPRECATED)
+alg:                              QPPO                  # name of the algorithm
+seed:                             42                    # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
+constant_seed:                    False                 # setting the same seed accross all runs
+checkpoint_at_end:                True                  # create checkpoint at the end of training
+checkpoint_freq:                  500                   # set checkpoint frequency, depends on training iterations
+ray_local_mode:                   True                  # set local_mode of ray to True for debugging
+ray_logging_path:                 logs/lunarlander      # logging directory
+total_num_cpus:                   10                    # total number of cpus
+total_num_gpus:                   0                     # total number of gpus
+ray_num_trial_samples:            1                     # number of hyperparameter combinations (trials) to run (works differently for grid_search)
+training_iterations:              1000                  # number of training iterations
+run_sections:                                           # specify the sections ['qrl_training' and 'plotting']
+                                - qrl_training          
+                                - plotting
+                                    
+############################## Env Config #############################################
+env:                              LunarLander-v2        # specifiy env string
 env_config:
-  mode:                   classical                   
+  mode:                           classical             # select the mode (see also wrapper class)
+  norm:                           True                  # normalize the input features
 
-# Additional custom parameters
-# withOUT rescaling of critic between 0-2
-algorithm_config:
-  num_gpus:                   0                   # number of gpus for each trial
-  num_workers:                20                   # number of worker for each trial. By ray default, every worker needs one cpu
-  num_envs_per_worker:        1                   # number of game enviroments for each worker
-  num_gpus_per_worker:        0                   # number of worker for each trial.
-  num_cpus_per_worker:        0.5                   # number of worker for each trial.
-  l:                          1
-  lr:                         0.001
-    # - grid_search
-    # - [0.001, 0.0001]   
-  lr_output_scaling:          0.01
-  #   - grid_search
-  #   - [0.01, 0.001]  
-  num_layers:                 5    
-  constant_seed:              False 
-  mode:                       quantum # classical, quantum, hybrid
-  optimizer:                  Adam
-  framework:                  torch
-  backend_type:               pennylane                             # This doesn't work yet
-  backend_name:               lightning.qubit
-  vqc_type:                   full_ent #rot_circuit_double #custom_ent_lunar
-    # - grid_search
-    # - [rot_circuit_double, custom_ent_lunar]
-  measurement_type_actor:           exp_@_exp            # type of measurement (check the python files for examples) (exp for discrete)
-  #   - grid_search
-  #   - [exp, exp_@_exp]
-  measurement_type_critic:    exp_@_exp
-  #   - grid_search
-  #   - [exp, exp_@_exp]
-  action_type:                normal                # action postprocessing type (raw/normal)
-  init_params:                0.1 
-  init_params_mode:           plus-zero-normal    # plus-zero-uniform #, plus-plus-normal. plus-zero-normal
-  layerwise_training:         False
-  use_input_scaling:          True                  # Uses input scaling (initialized at all ones)
-  use_output_scaling_actor:   True
-  init_output_scaling_actor:  [1.]
-    # - grid_search 
-    # - [10., [10.]] 
-  use_output_scaling_critic:  True                     # Uses output scaling  
-  init_output_scaling_critic: -1.
-    # - grid_search
-    # - [10, 30, 60]
-  gradient_clipping:          False
-  use_classical_layer:        False
-  layer_size:                 64
-  weight_logging_interval:    5000
-  weight_plotting:            True
+
+############################## Alg Config #############################################
+algorithm_config:                                       # config for QRL training
+  reuse_actors:                   True
+  framework:                      torch                 # ray framework [torch, tensorflow]
+  num_gpus:                       0                     # number of gpus for each trial
+  num_rollout_workers:            2                     # number of worker for each trial. By ray default, every worker needs one cpu
+  num_envs_per_worker:            1                     # number of game enviroments for each worker
+  num_gpus_per_worker:            0                     # number of gpus for each worker
+  num_cpus_per_worker:            1                     # number of cpus for each worker
+  ###########################################################################
+  lr:                             0.025                 # select lr for nn, variational params and input scaling params
+  lr_output_scaling:              0.1                   # select lr for output scaling params
+  num_layers:                     5                     # select number of layers of vqc (layer nn defined below)
+  ###########################################################################
+  mode:                           quantum               # select mode [classical, quantum, hybrid]
+  interface:                      torch                 # select pennylane interface, default: torch
+  diff_method:                    adjoint               # select pennylane diff_method [adjoing, backprop, ...] 
+  backend_name:                   lightning.qubit       # select pennylane backend [lightning.qubit, default.qubit, ...]
+  custom_optimizer:               Adam                  # select the classical optimizer [Adam, RMSprop, LBFGS, ...] 
+  ###########################################################################
+  vqc_type:                       [vqc_generator, 8]    # select vqc_generator or other circuit generator function + number of qubits
+  use_hadamard:                   True                  # Create equal superposition in the beginning
+  block_sequence:                 enc_var_ent           # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
+  encoding_type:                  angular_classical     # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
+  graph_encoding_type:            None                  # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
+  use_input_scaling_actor:        True                  # use input scaling for actor [True, False] 
+  init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
+  use_input_scaling_critic:       True                  # use input scaling for critic [True, False] 
+  init_input_scaling_critic:      [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
+  num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
+  quadratic_gate:                 ZZ                    # ZZ, XX, YY
+  linear_gate:                    RZ                    # RZ, RX, RY
+  annotations_gate:               RX                    # RZ, RX, RY
+  measurement_gate:               PauliZ                # PauliZ, PauliX, PauliY
+  variational_type:               RZ_RY                 # select the gate sequence [RZ_RY, RY_RZ]
+  num_variational_params:         2                     # select the number of params, so e.g. 2 for RZ_RY
+  init_variational_params:        0.1                   # select initialization of the variational parameters
+  init_variational_params_mode:   plus-zero-uniform     # plus-zero-uniform, plus-plus-normal, plus-zero-normal
+  entangling_type:                chain                 # type of entanglement [chain, full, ...]
+  entangling_gate:                CZ                    # type of entanglement gate [CNOT, CZ, CH, ...]
+  measurement_type_actor:         exp                   # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  use_output_scaling_actor:       True                  # use output scaling [True, False]
+  init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
+  postprocessing_actor:           standard              # select postprocessing (check the file postprocessing.py)
+  measurement_type_critic:        exp0                  # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
+  use_output_scaling_critic:      True                  # use output scaling [True, False]
+  init_output_scaling_critic:     [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
+  postprocessing_critic:          default               # select postprocessing (check the file postprocessing.py)
+  output_scaling_schedule:        False
+  use_temperature:                False
+  temperature_schedule:           [[0, 100_000], [1.00, 0.05]]   # number of increment steps, total steps
+  ###########################################################################
+  noise:                                                # use noise during training
+    coherent:                     [False, 0.]           # bool + float for magnitude of used coherent noise
+    depolarizing:                 [False, 0.001]        # bool + float for magnitude of used depolarizing noise
+  layerwise_training:             False                 # layerwise training (DEPRECATED)
+  gradient_clipping:              False                 # gradient clipping (DEPRECATED)
+  use_classical_layer:            False                 # additional postprocessing (DEPRECATED)
+  layer_size:                     [64, 64]              # classical NN, max 3 layers with in as number of neurons in the according layer
+  activation_function:            relu                  # activation function of classical NN
+  weight_logging_interval:        5000                  # weight logging + plotting interval (DEPRECATED)
+  weight_plotting:                False                 # weight logging + plotting (DEPRECATED)
+  ###########################################################################
+  # More ray params
+  explore:                        True
+
+
+############################## Eval Config #############################################
+evaluation:
+  set_seed:               True 
+  seed:                   42
+  ###########################################################################
+  plotting:
+    mode:                         auto 
+    y_axis:                       episode_reward_mean 
+    path:                         logs/uc/paper_2/10units/2024-04-08--17-00-08_QRL_QPG
   
-  train_batch_size:           4000
-  num_sgd_iter:               12
-  sgd_minibatch_size:         100
-  rollout_fragment_length:    200
-  gamma:                      0.99
-  lambda:                     0.99
-  # kl_coeff:                   1.
-  vf_loss_coeff:              0.5
-  clip_param:                 0.2
-  # grad_clip:                  3
-  vf_clip_param:              50000
-  # batch_mode:                 complete_episodes
-  # observation_filter:         MeanStdFilter
-
-
-

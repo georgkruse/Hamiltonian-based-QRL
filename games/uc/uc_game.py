@@ -23,13 +23,10 @@ class UC_game(gym.Env):
         self.n = env_config['num_generators']
         self.power_scaling = env_config['power_scaling']
         p_min_org, p_max_org, A_org, B_org, C_org = kazarlis_uc(10, env_config['path']) 
-        self.power_demands = env_config['power_demands']
-        self.generator_outputs = env_config['generator_outputs']
-        self.generator_constraints = env_config['generator_constraints']
         self.lambda_ = env_config['lambda']
         self.action_space_type = env_config['action_space_type']
         self.constraint_mode = env_config['constraint_mode']
-        self.num_stacked_timesteps = env_config['num_stacked_timesteps']
+        # self.num_stacked_timesteps = env_config['num_stacked_timesteps']
         self.episode_length = env_config['episode_length']
 
         self.norm = 1.0
@@ -89,18 +86,6 @@ class UC_game(gym.Env):
             self.generator_outputs = np.array(self.generator_outputs)
             self.time_series = self.power_demands 
 
-        # actions = np.reshape(np.unpackbits(np.arange(2**self.n).astype('>i8').view(np.uint8)), (-1, 64))[:,-self.n:]
-        # for timestep, power_demand in enumerate(self.power_demands):
-        #     data = []
-        #     for idx, action in enumerate(actions):
-        #         cost = self.objective_uc_qubo(action, self.A, self.B, self.C, power_demand, self.lambda_, self.n, self.generator_outputs)
-        #         data.append(cost)
-        #     data = np.sort(data) - np.min(data) + 1e-9
-        #     plt.plot(np.arange(len(data)), np.log(data))
-        #     plt.ylim(bottom=-2)
-        #     plt.savefig(f'costs_power_demand_log_{power_demand}.png')
-            # np.savetxt(f'games/uc/data/{self.config["mode"]}/cost_values_{self.config["mode"]}_timestep_{timestep}.csv', data)
-
         # Use Pyqubo to easily convert your QUBO to a Ising formulation
         y = [Binary(f'{i}') for i in range(self.n)]
         qubo = self.objective_uc_qubo(y, self.A, self.B, self.C, self.power_demands[0], self.lambda_, self.n, self.generator_outputs)
@@ -141,8 +126,6 @@ class UC_game(gym.Env):
         self.episodes += 1
         state = OrderedDict()
 
-
-
         if self.config['mode'] in ['dynamic', 'simple']:
             self.time_series = np.random.choice(self.power_demands, self.episode_length + self.num_stacked_timesteps + 1)
         elif self.config['mode'] in ['static', 'static_5', 'static_10', 'static_15', 'simple']:
@@ -175,10 +158,6 @@ class UC_game(gym.Env):
             self.optimal_actions.append(actions[np.argmin(data)])
             self.optimal_action_indices.append(np.argmin(data))
 
-        # self.time_series = np.array([0.4, 0.4 , 0.4, 1.2])
-        # self.qp = self.objective_uc_qubo_docplex(self.A, self.B, self.C, self.time_series, self.lambda_, self.n, self.generator_outputs)
-        # self.qp = self.objective_uc_qubo_docplex_cont(self.A, self.B, self.C, self.time_series, self.lambda_, self.n, self.generator_outputs)
-
         # Use Pyqubo to easily convert your QUBO to a Ising formulation
         for idx in range(self.num_stacked_timesteps):
             y = [Binary(f'{i}') for i in range(self.n)]
@@ -189,7 +168,7 @@ class UC_game(gym.Env):
                 for i in range(self.n):
                     if str(i) not in linear.keys():
                         linear[str(i)] = 0
-            # Add a minus to the linear term, because of the why pyqubo converts to ising models
+            # Add a minus to the linear term, because of the way pyqubo converts to ising models
             self.linear = linear 
             self.quadratic = quadratic
             linear_values = - np.array([*linear.values()])
@@ -210,54 +189,20 @@ class UC_game(gym.Env):
             binary_actions = np.reshape(np.unpackbits(np.arange(2**self.n).astype('>i8').view(np.uint8)), (-1, 64))[:,-self.n:]
             action = binary_actions[action]
 
-        if self.config['mode'] == 'dynamic':
-            for idx, a in enumerate(action):
-                if self.generator_status[idx] == a:
-                    self.current_constraint[idx] = max(self.current_constraint[idx]-1, 0)
-                else:
-                    if self.current_constraint[idx] == 0:
-                        self.generator_status[idx] = a
-                        self.current_constraint[idx] = deepcopy(self.generator_constraints[idx])
-                    else:
-                        self.current_constraint[idx] = max(self.current_constraint[idx]-1, 0)
-
-        # elif self.config['mode'] in ['static', 'static_5', 'static_10', 'static_15', 'simple']:
-        #     self.generator_status = action
-        else:
-            self.generator_status = action
+        self.generator_status = action
 
         self.history.append(sum(self.generator_status*self.generator_outputs))
         reward = self.objective_uc_qubo(self.generator_status, self.A, self.B, self.C, self.time_series[self.timestep], self.lambda_, self.n, self.generator_outputs)
         
         self.actual_cost = reward
-        if self.config['reward_mode'] == 'sparse':
-            if reward == 0.:
-                reward = 10
-            else:
-                reward = - reward
-        elif self.config['reward_mode'] == 'continuous':
-            if reward == 0.:
-                reward = 10
-            else:
-                reward = - reward
-        elif self.config['reward_mode'] == 'optimal':
-            reward = reward - self.optimal_costs[self.timestep]
+
+        if self.config['reward_mode'] == 'optimal':
             reward = - reward 
         elif self.config['reward_mode'] == 'optimal_sqrt':
-            reward = reward - self.optimal_costs[self.timestep]
             reward = - np.sqrt(reward) 
         elif self.config['reward_mode'] == 'optimal_log':
-            reward = reward - self.optimal_costs[self.timestep] + 1e-9
             reward = - np.log(reward)
             reward = np.min([1.0, reward]) 
-        elif self.config['reward_mode'] == 'log':
-            reward = - np.log(reward)
-        elif self.config['reward_mode'] == 'optimal_spike':
-            reward = reward - self.optimal_costs[self.timestep]
-            if reward > 0.:
-                reward = -1
-            else:
-                reward = 1
 
         self.timestep +=1
 
@@ -271,7 +216,7 @@ class UC_game(gym.Env):
                     if str(i) not in linear.keys():
                         linear[str(i)] = 0
 
-            # Add a minus to the linear term, because of the why pyqubo converts to ising models
+            # Add a minus to the linear term, because of the way pyqubo converts to ising models
             self.linear = linear 
             self.quadratic = quadratic
             linear_values = - np.array([*linear.values()])
@@ -281,9 +226,6 @@ class UC_game(gym.Env):
         if self.timestep >= self.episode_length:
             done = True
             self.timestep = 0
-
-        # if self.episodes % 100 == 0:
-        #     print('episode:', self.episodes, 'reward:', reward, 'target:', self.time_series[self.timestep], 'action:', action)
 
         return next_state, reward, done, False, {}
     

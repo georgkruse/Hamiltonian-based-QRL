@@ -38,9 +38,9 @@ def create_config(config, env_config):
                         'QDQN': QuantumDQN_Model
                         }
         callback_switch = {
-                        'PG_MaxCut_Callbacks': PG_MaxCut_Callbacks,
+                        'MaxCut_Callback': MaxCut_Callback,
                         'KPCallbacks':  KnapsackCallback,
-                        'PG_TSP_Callbacks': PG_TSP_Callbacks,
+                        'TSP_Callback': TSP_Callback,
         }
         
         # keys to lower-case for case insensitivity and improved fault tolerance

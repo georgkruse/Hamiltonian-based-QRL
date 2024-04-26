@@ -553,76 +553,78 @@ class QuantumDQN_Model(TorchModelV2,nn.Module,ABC):
                     for node in range(nodes):
                         logits[batch][node] *= state["scale_qvalues"][batch][node][1]
 
-        if "annotations" in state.keys():
-            if 'current_node' in state.keys():
-                if state['current_node'][0].to(torch.int).item() != -1:
+
+        if isinstance(self.obs_space, Dict):
+            if "annotations" in state.keys():
+                if 'current_node' in state.keys():
+                    if state['current_node'][0].to(torch.int).item() != -1:
+                        if not state['quadratic_0'][0,0,0].to(torch.int).item() + state['quadratic_0'][0,0,1].to(torch.int).item() == 0:
+                            new_logits_batch = []
+                            
+                            for batch_dim in range(state["quadratic_0"].shape[0]):
+                                new_logits = []
+                                weights_comp = []
+                                for idx, (node1, node2, value) in enumerate(state['quadratic_0'][batch_dim]):
+                                    node1 = int(node1)
+                                    node2 = int(node2)
+                                    if node1 == state['current_node'][batch_dim,0]:
+                                        if state['annotations'][batch_dim,node2,1] == np.pi:
+                                            # new_logits.append(logits[batch_dim,idx]*value)
+                                            new_logits.append(logits[batch_dim,idx])
+                                            weights_comp.append(value)
+                                        elif state['annotations'][batch_dim,node2,1] == 0:
+                                            new_logits.append(torch.tensor(-10_000))
+                                            weights_comp.append(10_000)
+                                    elif node2 == state['current_node'][batch_dim,0]:
+                                        if state['annotations'][batch_dim,node1,1] == np.pi:
+                                            # logits[idx] = logits[idx]*value
+                                            # new_logits.append(logits[batch_dim,idx]*value)
+                                            new_logits.append(logits[batch_dim,idx])
+                                            weights_comp.append(value)
+
+                                        elif state['annotations'][batch_dim,node1,1] == 0:
+                                            # logits[idx] = -10_000
+                                            new_logits.append(torch.tensor(-10_000))
+                                            weights_comp.append(10_000)
+                                    
+                                new_logits_batch.append(torch.stack(new_logits))
+                            logits = torch.stack(new_logits_batch, dim=0)
+                        else:
+                            logits = logits[:,:self.action_space.n]
+
+                    elif state['current_node'][0].to(torch.int).item() == -1:
+                        nodes = state["annotations"].shape[1]
+                        batch_dim = state["annotations"].shape[0]
+                        if batch_dim == 1:
+                            for batch in range(batch_dim):
+                                for node in range(nodes):
+                                    if state["annotations"][batch][node][1] == 0:
+                                        logits[batch][node] = -np.inf
+                                    else:
+                                        logits[batch][node] *= -1
+                        else:
+                            for batch in range(batch_dim):
+                                for node in range(nodes):
+                                    if state["annotations"][batch][node][1] == 0:
+                                        logits[batch][node] = -10000
+                                    else:
+                                        logits[batch][node] *= -1
+            
+                else:
                     if not state['quadratic_0'][0,0,0].to(torch.int).item() + state['quadratic_0'][0,0,1].to(torch.int).item() == 0:
-                        new_logits_batch = []
-                        
-                        for batch_dim in range(state["quadratic_0"].shape[0]):
-                            new_logits = []
-                            weights_comp = []
-                            for idx, (node1, node2, value) in enumerate(state['quadratic_0'][batch_dim]):
-                                node1 = int(node1)
-                                node2 = int(node2)
-                                if node1 == state['current_node'][batch_dim,0]:
-                                    if state['annotations'][batch_dim,node2,1] == np.pi:
-                                        # new_logits.append(logits[batch_dim,idx]*value)
-                                        new_logits.append(logits[batch_dim,idx])
-                                        weights_comp.append(value)
-                                    elif state['annotations'][batch_dim,node2,1] == 0:
-                                        new_logits.append(torch.tensor(-10_000))
-                                        weights_comp.append(10_000)
-                                elif node2 == state['current_node'][batch_dim,0]:
-                                    if state['annotations'][batch_dim,node1,1] == np.pi:
-                                        # logits[idx] = logits[idx]*value
-                                        # new_logits.append(logits[batch_dim,idx]*value)
-                                        new_logits.append(logits[batch_dim,idx])
-                                        weights_comp.append(value)
-
-                                    elif state['annotations'][batch_dim,node1,1] == 0:
-                                        # logits[idx] = -10_000
-                                        new_logits.append(torch.tensor(-10_000))
-                                        weights_comp.append(10_000)
-                                
-                            new_logits_batch.append(torch.stack(new_logits))
-                        logits = torch.stack(new_logits_batch, dim=0)
-                    else:
-                        logits = logits[:,:self.action_space.n]
-
-                elif state['current_node'][0].to(torch.int).item() == -1:
-                    nodes = state["annotations"].shape[1]
-                    batch_dim = state["annotations"].shape[0]
-                    if batch_dim == 1:
-                        for batch in range(batch_dim):
-                            for node in range(nodes):
-                                if state["annotations"][batch][node][1] == 0:
-                                    logits[batch][node] = -np.inf
-                                else:
-                                    logits[batch][node] *= -1
-                    else:
-                        for batch in range(batch_dim):
-                            for node in range(nodes):
-                                if state["annotations"][batch][node][1] == 0:
-                                    logits[batch][node] = -10000
-                                else:
-                                    logits[batch][node] *= -1
-        
-            else:
-                if not state['quadratic_0'][0,0,0].to(torch.int).item() + state['quadratic_0'][0,0,1].to(torch.int).item() == 0:
-                    nodes = state["annotations"].shape[1]
-                    batch_dim = state["annotations"].shape[0]
-                    if batch_dim == 1:
-                        for batch in range(batch_dim):
-                            for node in range(nodes):
-                                if state["annotations"][batch][node][1] == 0:
-                                    logits[batch][node] = -np.inf
-                    else:
-                        for batch in range(batch_dim):
-                            for node in range(nodes):
-                                if state["annotations"][batch][node][1] == 0:
-                                    logits[batch][node] = -10000
-        
+                        nodes = state["annotations"].shape[1]
+                        batch_dim = state["annotations"].shape[0]
+                        if batch_dim == 1:
+                            for batch in range(batch_dim):
+                                for node in range(nodes):
+                                    if state["annotations"][batch][node][1] == 0:
+                                        logits[batch][node] = -np.inf
+                        else:
+                            for batch in range(batch_dim):
+                                for node in range(nodes):
+                                    if state["annotations"][batch][node][1] == 0:
+                                        logits[batch][node] = -10000
+            
         
         return logits, []
 

@@ -19,7 +19,7 @@ from utils.test_pipeline import run_test_pipeline
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="This is the runfile for the open source baseline repo.")
-    parser.add_argument("--alg", default= "configs/qppo/qppo_pendulum.yml", 
+    parser.add_argument("--alg", default= "configs/qppo/qppo_uc.yml", 
                         metavar="FILE", help="path to alg config file", type=str)
     parser.add_argument("--test", default='None', type=str)
     args = parser.parse_args()

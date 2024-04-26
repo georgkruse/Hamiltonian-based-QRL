@@ -6,10 +6,19 @@ import torch
 
 def graph_encoding_block(config, theta, weights, layer, type=None):
 
-    if (type == 'actor' or type == 'critic'):
-        params_input = weights[f'input_scaling_{type}'][layer]
+    if type == 'actor':
         params_var = weights[f'weights_{type}'][layer]
-
+        if 'use_input_scaling' in config.keys():
+            use_input_scaling = config['use_input_scaling']
+            params_input = weights[f'input_scaling_{type}'][layer]
+        elif 'use_input_scaling_actor' in config.keys():
+            use_input_scaling = config['use_input_scaling_actor']
+            params_input = weights[f'input_scaling_{type}'][layer]
+    elif type == 'critic':
+        params_var = weights[f'weights_{type}'][layer]
+        use_input_scaling = config['use_input_scaling_critic']
+        if use_input_scaling:
+            params_input = weights[f'input_scaling_{type}'][layer]
     if isinstance(theta['quadratic_0'], torch.Tensor):
         indexing_quadratic = theta['quadratic_0'][:,:,:2].detach().numpy()
         indexing_linear = theta['linear_0'][:,:,0].detach().numpy()

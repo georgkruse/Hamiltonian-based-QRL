@@ -1,11 +1,11 @@
 type:                             QRL                   # choose a type: RL, GA, Hypernetwork (DEPRECATED)
-alg:                              QPPO                  # name of the algorithm
+alg:                              QPG                   # name of the algorithm
 seed:                             42                    # seed for ray alogorithms/tensorflow/pytorch for reproduceabel results
 constant_seed:                    False                 # setting the same seed accross all runs
 checkpoint_at_end:                True                  # create checkpoint at the end of training
 checkpoint_freq:                  500                   # set checkpoint frequency, depends on training iterations
-ray_local_mode:                   False                 # set local_mode of ray to True for debugging
-ray_logging_path:                 logs/cartpole         # logging directory
+ray_local_mode:                   True                 # set local_mode of ray to True for debugging
+ray_logging_path:                 logs/pendulum         # logging directory
 total_num_cpus:                   10                    # total number of cpus
 total_num_gpus:                   0                     # total number of gpus
 ray_num_trial_samples:            1                     # number of hyperparameter combinations (trials) to run (works differently for grid_search)
@@ -15,21 +15,15 @@ run_sections:                                           # specify the sections [
                                 - plotting
                                     
 ############################## Env Config #############################################
-env:                              CartPole-v1           # specifiy env string
+env:                              Pendulum-v1           # specifiy env string
 env_config:
   mode:                           classical             # select the mode (see also wrapper class)
-
 
 
 ############################## Alg Config #############################################
 algorithm_config:                                       # config for QRL training
   reuse_actors:                   True
   framework:                      torch                 # ray framework [torch, tensorflow]
-  num_gpus:                       0                     # number of gpus for each trial
-  num_rollout_workers:            2                     # number of worker for each trial. By ray default, every worker needs one cpu
-  num_envs_per_worker:            1                     # number of game enviroments for each worker
-  num_gpus_per_worker:            0                     # number of gpus for each worker
-  num_cpus_per_worker:            1                     # number of cpus for each worker
   ###########################################################################
   lr:                             0.025                 # select lr for nn, variational params and input scaling params
   lr_output_scaling:              0.1                   # select lr for output scaling params
@@ -41,15 +35,13 @@ algorithm_config:                                       # config for QRL trainin
   backend_name:                   lightning.qubit       # select pennylane backend [lightning.qubit, default.qubit, ...]
   custom_optimizer:               Adam                  # select the classical optimizer [Adam, RMSprop, LBFGS, ...] 
   ###########################################################################
-  vqc_type:                       [vqc_generator, 4]    # select vqc_generator or other circuit generator function + number of qubits
+  vqc_type:                       [vqc_generator, 3]    # select vqc_generator or other circuit generator function + number of qubits
   use_hadamard:                   True                  # Create equal superposition in the beginning
   block_sequence:                 enc_var_ent           # select the block sequence, enc_var_ent == classical hwe ansatz, graph_encoding only needs enc
   encoding_type:                  angular_classical     # data encoding type [angular_classical (RY_RZ), layerwise_arctan_sigmoid, graph_encoding ... ]
-  graph_encoding_type:            None                  # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
-  use_input_scaling_actor:        True                  # use input scaling for actor [True, False] 
+  graph_encoding_type:            s-ppgl                # if encoding_type=graph_encoding, than select [s-ppgl, m-ppgl, h-ppgl, hamiltonian-hwe, angular-hwe, angular, ...]
+  use_input_scaling:              True                  # use input scaling [True, False] -> main parameters for graph encoding of eqc/neqc 
   init_input_scaling_actor:       [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
-  use_input_scaling_critic:       True                  # use input scaling for critic [True, False] 
-  init_input_scaling_critic:      [1.]                  # if list, then each gate gets one params, if single float, all have same param [[1.], 1., ...]
   num_scaling_params:             2                     # select the number of params, so e.g. 2 for angular_classical -> RY_RZ
   quadratic_gate:                 ZZ                    # ZZ, XX, YY
   linear_gate:                    RZ                    # RZ, RX, RY
@@ -65,10 +57,6 @@ algorithm_config:                                       # config for QRL trainin
   use_output_scaling_actor:       True                  # use output scaling [True, False]
   init_output_scaling_actor:      [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
   postprocessing_actor:           standard              # select postprocessing (check the file postprocessing.py)
-  measurement_type_critic:        exp0                  # type of measurement (check the python files for examples) (exp for discrete) exp_@_exp+exp
-  use_output_scaling_critic:      True                  # use output scaling [True, False]
-  init_output_scaling_critic:     [1.]                  # if list, then each qubit gets one param, if single float, all have same param [[1.], 1., ...]
-  postprocessing_critic:          default               # select postprocessing (check the file postprocessing.py)
   output_scaling_schedule:        False
   use_temperature:                False
   temperature_schedule:           [[0, 100_000], [1.00, 0.05]]   # number of increment steps, total steps
