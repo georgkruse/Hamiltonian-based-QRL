@@ -4,8 +4,8 @@ seed:                             42                    # seed for ray alogorith
 constant_seed:                    False                 # setting the same seed accross all runs
 checkpoint_at_end:                True                  # create checkpoint at the end of training
 checkpoint_freq:                  500                   # set checkpoint frequency, depends on training iterations
-ray_local_mode:                   False                 # set local_mode of ray to True for debugging
-ray_logging_path:                 logs/pendulum         # logging directory
+ray_local_mode:                   True                 # set local_mode of ray to True for debugging
+ray_logging_path:                 logs/tb         # logging directory
 total_num_cpus:                   10                    # total number of cpus
 total_num_gpus:                   0                     # total number of gpus
 ray_num_trial_samples:            2                     # number of hyperparameter combinations (trials) to run (works differently for grid_search)
@@ -15,10 +15,9 @@ run_sections:                                           # specify the sections [
                                 - plotting
                                     
 ############################## Env Config #############################################
-env:                              Pendulum-v1           # specifiy env string
+env:                              TB           # specifiy env string
 env_config:
   mode:                           classical             # select the mode (see also wrapper class)
-
 
 ############################## Alg Config #############################################
 algorithm_config:                                       # config for QRL training
@@ -27,10 +26,10 @@ algorithm_config:                                       # config for QRL trainin
   ###########################################################################
   lr:                             0.025                 # select lr for nn, variational params and input scaling params
   lr_output_scaling:              0.1                   # select lr for output scaling params
-  num_layers:                      
-    - grid_search
-    - int
-    - [1,3,5]                     # select number of layers of vqc (layer nn defined below)
+  num_layers:                     3 
+    # - grid_search
+    # - int
+    # - [1,3,5]                     # select number of layers of vqc (layer nn defined below)
   ###########################################################################
   mode:                           quantum               # select mode [classical, quantum, hybrid]
   interface:                      torch                 # select pennylane interface, default: torch

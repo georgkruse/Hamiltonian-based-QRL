@@ -179,7 +179,9 @@ class QuantumPGModel(TorchModelV2, nn.Module, ABC):
         self.num_params = self.config['num_variational_params']
 
         if isinstance(self.action_space, Box):
-            self.num_outputs = self.action_space.shape[0]*2
+            print(self.action_space)
+            self.num_outputs = self.action_space.shape[0]       #CUSTOM 
+            #self.num_outputs = self.action_space.shape[0]*2     #ORIGINAL
         elif isinstance(self.action_space, Discrete):
             self.num_outputs = self.action_space.n
         elif isinstance(self.action_space, MultiBinary):
@@ -381,6 +383,7 @@ class QuantumPGModel(TorchModelV2, nn.Module, ABC):
                 #     prob = torch.reshape(prob, (-1, self.action_space.shape[0], self.action_space.shape[1]))
 
             if self.use_output_scaling_actor:
+                print("prob, self.config, self.num_outputs, self._parameters, 'actor', -1, self.num_outputs\n", prob, self.config, self.num_outputs, self._parameters, 'actor', -1, self.num_outputs)
                 logits = torch.reshape(postprocessing(prob, self.config, self.num_outputs, self._parameters, 'actor'), (-1, self.num_outputs))
             else:
                 logits =  torch.reshape(prob, (-1, self.num_outputs)) #prob[:,:self.num_outputs]
@@ -495,4 +498,3 @@ class QuantumPGModel(TorchModelV2, nn.Module, ABC):
         self._logits = logits
         return logits, []
     
-

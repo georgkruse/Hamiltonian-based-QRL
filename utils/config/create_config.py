@@ -37,6 +37,7 @@ def create_config(config, env_config):
                         'QPG': QuantumPGModel,
                         'QDQN': QuantumDQN_Model
                         }
+        
         callback_switch = {
                         'MaxCut_Callback': MaxCut_Callback,
                         'KPCallbacks':  KnapsackCallback,

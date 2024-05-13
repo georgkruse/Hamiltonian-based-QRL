@@ -4,6 +4,16 @@ from gymnasium.spaces import Box, Discrete
 
 def postprocessing(prediction, config, action_space, weights, type):
 
+    print(
+        "In Postprocessing: \n", 
+        "predicion:\n", prediction, 
+        "\nconfig:\n", config,
+        "\naction_space:\n", action_space, 
+        "\nweights:\n", weights, 
+        "\ntype:\n", type,
+        "\n\n"
+        )
+
     if type == 'actor' and config['use_output_scaling_actor']:
         scaling = weights[f'output_scaling_{type}']
     elif type in ['es', 'ga']:
